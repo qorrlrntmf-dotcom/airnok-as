@@ -39,10 +39,10 @@
     --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
     --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
   }
-  html, body { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif; background:var(--bg); color:var(--text); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  html, body { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif; background:radial-gradient(circle at top, #F4FBF7 0%, #F8F9FA 34%, #F4F6F8 100%); color:var(--text); line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100vh; }
   .hidden { display:none !important; }
 
-  header { background:var(--primary); color:white; padding:16px 20px; position:sticky; top:0; z-index:50; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  header { background:linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 48%, var(--primary-light) 100%); color:white; padding:16px 20px; position:sticky; top:0; z-index:50; box-shadow:0 14px 34px rgba(15,42,31,0.16); }
   .header-inner { max-width:720px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; }
   .logo-wrap { display:flex; align-items:center; gap:10px; }
   .logo-img { height:32px; width:auto; max-width:200px; object-fit:contain; }
@@ -57,7 +57,7 @@
   .intro h1 { font-size:24px; margin:0 0 8px; color:var(--primary-dark); letter-spacing:-0.5px; }
   .intro p { color:var(--text-muted); font-size:14px; margin:0; }
 
-  .card { background:var(--card); border-radius:var(--radius); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
+  .card { background:rgba(255,255,255,0.94); border-radius:18px; padding:22px; margin-bottom:16px; box-shadow:0 18px 40px rgba(15,23,42,0.08); border:1px solid rgba(255,255,255,0.85); backdrop-filter:blur(10px); }
   .field { margin-bottom:18px; }
   .field label { display:block; font-size:14px; font-weight:600; margin-bottom:8px; color:var(--text); }
   .field label .req { color:var(--error); margin-left:2px; }
@@ -82,7 +82,9 @@
   .upload-zone .upload-cta { color:var(--primary); font-weight:600; }
   .preview-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:8px; margin-top:12px; }
   .preview-item { position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
-  .preview-item img { width:100%; height:100%; object-fit:cover; }
+  .preview-item img, .preview-item video { width:100%; height:100%; object-fit:cover; }
+  .preview-item video { background:#000; }
+  .preview-item .file-badge { position:absolute; left:4px; bottom:4px; background:rgba(0,0,0,0.72); color:#fff; font-size:10px; font-weight:700; padding:3px 6px; border-radius:999px; }
   .preview-item .remove-btn { position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.7); color:white; border:none; cursor:pointer; font-size:14px; line-height:1; display:flex; align-items:center; justify-content:center; }
 
   .checkbox-wrap { display:flex; align-items:flex-start; gap:10px; padding:12px; background:#F8F9FA; border-radius:8px; cursor:pointer; }
@@ -94,6 +96,73 @@
   .submit-btn:hover { background:var(--primary-dark); }
   .submit-btn:active { transform:scale(0.99); }
   .submit-btn:disabled { background:#999; cursor:not-allowed; }
+
+  /* ===== Entry selector (A/S 신청 / 신청 조회) ===== */
+  .entry-selector { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:20px; }
+  .action-card { display:flex; align-items:center; gap:14px; width:100%; padding:22px 18px; border-radius:20px; background:linear-gradient(180deg,#FFFFFF 0%,#F4FAF6 100%); box-shadow:0 18px 40px rgba(15,23,42,0.08); border:1px solid rgba(27,67,50,0.10); cursor:pointer; text-align:left; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; font-family:inherit; }
+  .action-card:hover { transform:translateY(-3px); box-shadow:0 22px 46px rgba(15,23,42,0.12); border-color:rgba(27,67,50,0.24); }
+  .action-icon { width:56px; height:56px; border-radius:16px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(27,67,50,0.14), rgba(45,106,79,0.22)); font-size:26px; flex-shrink:0; }
+  .action-text { display:flex; flex-direction:column; gap:4px; }
+  .action-text strong { font-size:18px; color:var(--primary-dark); line-height:1.2; }
+  .action-text span { font-size:12.5px; color:var(--text-muted); line-height:1.5; }
+  .customer-subview-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .customer-subview-head .summary { color:var(--text-muted); font-size:12.5px; }
+
+  /* ===== Step indicator (premium) ===== */
+  .step-indicator { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-bottom:22px; }
+  .step-chip { position:relative; min-height:70px; padding:12px 10px 12px 46px; border-radius:14px; background:linear-gradient(180deg,#FFFFFF 0%,#F4F7F5 100%); color:var(--text-muted); font-size:11.5px; font-weight:700; text-align:left; line-height:1.35; border:1px solid rgba(148,163,184,0.22); box-shadow:0 6px 18px rgba(15,23,42,0.05); }
+  .step-chip::before { content:attr(data-step); position:absolute; left:10px; top:50%; transform:translateY(-50%); width:26px; height:26px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; background:#E5E7EB; color:#475569; }
+  .step-chip.active { background:linear-gradient(135deg, rgba(27,67,50,0.14), rgba(45,106,79,0.08)); color:var(--primary-dark); border-color:rgba(27,67,50,0.28); box-shadow:0 14px 28px rgba(27,67,50,0.12); }
+  .step-chip.active::before { background:var(--primary); color:#fff; }
+  .step-chip.done { background:linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color:#fff; border-color:transparent; }
+  .step-chip.done::before { background:rgba(255,255,255,0.25); color:#fff; }
+  .form-step { display:none; }
+  .form-step.active { display:block; }
+  .wizard-nav { display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top:24px; }
+  .wizard-nav .btn, .wizard-nav .submit-btn { min-width:120px; box-shadow:0 8px 20px rgba(15,23,42,0.08); }
+  .wizard-nav-end { justify-content:flex-end; }
+  .guide-card { background:linear-gradient(180deg,#FFFFFF 0%,#F8FBF9 100%); border:1px solid rgba(148,163,184,0.18); border-radius:16px; padding:20px; margin-bottom:14px; box-shadow:0 10px 24px rgba(15,23,42,0.05); }
+  .guide-card h3, .guide-card h4 { margin:0 0 10px; color:var(--primary-dark); }
+  .guide-card p { margin:0; white-space:pre-wrap; color:var(--text); }
+  .guide-image-wrap { margin-top:14px; border:1px dashed rgba(148,163,184,0.35); border-radius:12px; background:#fff; overflow:hidden; }
+  .guide-image { display:block; width:100%; max-height:360px; object-fit:contain; background:#fff; }
+  .guide-empty { padding:28px 18px; text-align:center; color:var(--text-muted); font-size:13px; }
+  .guide-note { margin-top:12px; padding:14px 16px; background:#FFF8E8; border:1px solid #FDE68A; border-radius:10px; font-size:13px; color:#92400E; white-space:pre-wrap; }
+  .review-grid { display:grid; grid-template-columns:1fr; gap:12px; margin-top:16px; }
+  .review-card { background:linear-gradient(180deg,#FFFFFF 0%,#F8FBF9 100%); border:1px solid rgba(148,163,184,0.18); border-radius:14px; padding:16px; transition:border-color .2s, box-shadow .2s, transform .2s; }
+  .review-card.active { border-color:var(--primary); box-shadow:0 0 0 3px rgba(27,67,50,0.08); transform:translateY(-1px); }
+  .review-card h4 { margin:0 0 12px; color:var(--primary-dark); font-size:15px; }
+  .review-list { display:grid; grid-template-columns:minmax(92px,120px) 1fr; gap:8px 12px; font-size:14px; }
+  .review-label { color:var(--text-muted); font-weight:600; }
+  .review-value { color:var(--text); white-space:pre-wrap; word-break:break-word; }
+  .review-inline-badges { display:flex; flex-wrap:wrap; gap:8px; }
+
+  /* ===== Lookup / chat ===== */
+  .lookup-form-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+  .lookup-status-row { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:16px 0 10px; flex-wrap:wrap; }
+  .lookup-summary { color:var(--text); font-size:13.5px; font-weight:600; }
+  .realtime-pill { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background:#E8F3EC; color:var(--primary-dark); font-size:12px; font-weight:700; }
+  .realtime-pill::before { content:''; width:8px; height:8px; border-radius:999px; background:var(--success); box-shadow:0 0 0 6px rgba(22,163,74,0.12); animation:pulseDot 1.4s ease-in-out infinite; }
+  @keyframes pulseDot { 0%,100%{opacity:1;} 50%{opacity:.45;} }
+  .lookup-result-card { background:linear-gradient(180deg,#FFFFFF 0%,#F8FBF9 100%); border:1px solid rgba(148,163,184,0.18); border-radius:16px; padding:18px; margin-top:14px; box-shadow:0 14px 28px rgba(15,23,42,0.05); }
+  .lookup-result-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .lookup-result-title strong { display:block; font-size:17px; color:var(--primary-dark); margin-bottom:4px; }
+  .lookup-result-sub { color:var(--text-muted); font-size:12.5px; }
+  .lookup-meta-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 12px; margin-bottom:14px; }
+  .lookup-meta-item { padding:10px 12px; border-radius:12px; background:#F8FAFB; border:1px solid rgba(148,163,184,0.16); }
+  .lookup-meta-item .label { display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px; font-weight:600; }
+  .lookup-meta-item .value { display:block; font-size:13.5px; font-weight:700; color:var(--text); }
+  .lookup-section-title { margin:16px 0 10px; color:var(--primary-dark); font-size:13px; font-weight:800; letter-spacing:.02em; }
+  .chat-thread { display:flex; flex-direction:column; gap:8px; max-height:320px; overflow-y:auto; padding:6px 4px; background:#F7FAF8; border:1px solid rgba(148,163,184,0.18); border-radius:12px; }
+  .chat-bubble { max-width:88%; padding:10px 12px; border-radius:14px; background:#fff; border:1px solid rgba(148,163,184,0.18); }
+  .chat-bubble.customer { margin-left:auto; background:#E8F3EC; border-color:rgba(27,67,50,0.20); }
+  .chat-bubble.admin { margin-right:auto; background:#FFFFFF; }
+  .chat-meta { font-size:10.5px; color:var(--text-muted); margin-bottom:3px; font-weight:600; }
+  .chat-message { white-space:pre-wrap; font-size:13.5px; color:var(--text); line-height:1.5; }
+  .chat-empty { padding:20px 12px; text-align:center; color:var(--text-muted); font-size:12.5px; }
+  .chat-compose { display:flex; gap:8px; margin-top:10px; align-items:flex-end; }
+  .chat-compose textarea { flex:1; min-height:64px; padding:10px 12px; border:1.5px solid var(--border); border-radius:12px; font-size:14px; font-family:inherit; resize:vertical; background:#fff; }
+  .chat-compose .btn { min-width:80px; }
 
   .complete-screen { text-align:center; padding:40px 20px; }
   .complete-icon { width:80px; height:80px; background:var(--success); border-radius:50%; margin:0 auto 24px; display:flex; align-items:center; justify-content:center; color:white; font-size:40px; }
@@ -132,12 +201,15 @@
   .admin-tab.active { background:var(--primary); color:white; }
   .admin-tab:hover:not(.active) { background:#F3F4F6; color:var(--text); }
 
-  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
-  .stat-card { background:white; padding:16px; border-radius:var(--radius); box-shadow:var(--shadow); border-left:4px solid var(--primary); }
-  .stat-card .label { font-size:12px; color:var(--text-muted); margin-bottom:6px; }
-  .stat-card .value { font-size:24px; font-weight:700; color:var(--primary-dark); }
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:20px; }
+  .stat-card { background:linear-gradient(180deg,#FFFFFF 0%,#F8FBF9 100%); padding:18px 16px; border-radius:16px; box-shadow:0 12px 26px rgba(15,23,42,0.06); border:1px solid rgba(148,163,184,0.16); position:relative; overflow:hidden; transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease; cursor:pointer; }
+  .stat-card::after { content:''; position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--accent, var(--primary)); opacity:.9; }
+  .stat-card:hover { transform:translateY(-2px); box-shadow:0 18px 34px rgba(15,23,42,0.10); border-color:rgba(27,67,50,0.22); }
+  .stat-card.active { border-color:rgba(27,67,50,0.40); box-shadow:0 0 0 3px rgba(27,67,50,0.10), 0 18px 34px rgba(15,23,42,0.10); }
+  .stat-card .label { font-size:12px; color:var(--text-muted); margin-bottom:8px; font-weight:700; }
+  .stat-card .value { font-size:26px; font-weight:800; color:var(--primary-dark); letter-spacing:-0.02em; }
 
-  .filter-bar { background:white; padding:16px; border-radius:var(--radius); margin-bottom:16px; box-shadow:var(--shadow); }
+  .filter-bar { background:rgba(255,255,255,0.94); padding:16px; border-radius:16px; margin-bottom:16px; box-shadow:0 12px 26px rgba(15,23,42,0.05); border:1px solid rgba(148,163,184,0.16); }
   .filter-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; }
   .filter-row input, .filter-row select { padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:13px; background:white; }
 
@@ -149,18 +221,21 @@
   tbody tr { cursor:pointer; transition:background 0.1s; }
   tbody tr:hover { background:#FAFAFA; }
   .badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
-  .badge-received { background:#E5E7EB; color:#4B5563; }
-  .badge-checking { background:#FEF3C7; color:#92400E; }
-  .badge-processing { background:#DBEAFE; color:#1E40AF; }
-  .badge-completed { background:#D1FAE5; color:#065F46; }
+  .badge-as_received { background:#E5E7EB; color:#374151; }
+  .badge-as_received_done { background:#FEF3C7; color:#92400E; }
+  .badge-pickup_in_progress { background:#FFEDD5; color:#9A3412; }
+  .badge-warehouse_received { background:#DCFCE7; color:#166534; }
+  .badge-as_processing { background:#DBEAFE; color:#1E40AF; }
+  .badge-shipment_sent { background:#D1FAE5; color:#065F46; }
   .empty-state { padding:60px 20px; text-align:center; color:var(--text-muted); }
 
   .detail-modal { max-width:600px; }
   .detail-row { display:flex; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
   .detail-row .label { font-weight:600; min-width:100px; color:var(--text-muted); }
   .detail-row .value { flex:1; }
-  .detail-images { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; margin-top:8px; }
-  .detail-images img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid var(--border); }
+  .detail-images, .detail-videos { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; margin-top:8px; }
+  .detail-images img, .detail-videos video { width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; border:1px solid var(--border); background:#000; }
+  .detail-images img { cursor:pointer; }
   .status-select { padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; width:100%; margin-top:8px; }
   .memo-area { width:100%; min-height:80px; padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; margin-top:8px; resize:vertical; }
   .timeline { margin-top:16px; padding-left:16px; border-left:2px solid var(--border); }
@@ -210,9 +285,19 @@
     .intro h1 { font-size:20px; }
     .channel-grid { grid-template-columns:1fr 1fr; }
     .admin-page { padding:12px; }
-    .stat-card .value { font-size:20px; }
+    .stat-card .value { font-size:22px; }
     th, td { padding:10px 8px; font-size:12px; }
     .editor-grid { grid-template-columns:1fr; }
+    .entry-selector { grid-template-columns:1fr; }
+    .lookup-form-grid, .lookup-meta-grid, .step-indicator { grid-template-columns:1fr; }
+    .step-chip { min-height:54px; padding:10px 10px 10px 44px; }
+    .action-card { padding:18px; }
+    .action-text strong { font-size:17px; }
+    .wizard-nav { flex-wrap:wrap; }
+    .wizard-nav .btn, .wizard-nav .submit-btn { width:100%; }
+    .review-list { grid-template-columns:1fr; }
+    .chat-compose { flex-direction:column; }
+    .chat-compose .btn { width:100%; }
   }
 </style>
 </head>
@@ -234,7 +319,33 @@
     <p id="introDesc">오투라이프캠핑 · AirNOK 제품에 대한 A/S를<br/>온라인으로 간편하게 신청하세요.</p>
   </div>
 
-  <form class="card" id="receiptForm" novalidate>
+  <!-- 진입 분기 (A/S 신청 / 신청 조회) -->
+  <div class="entry-selector" id="entrySelector">
+    <button type="button" class="action-card" id="startApplyCard">
+      <div class="action-icon">📝</div>
+      <div class="action-text">
+        <strong>A/S 신청</strong>
+        <span>신규 접수를 진행하고 단계별 안내를 확인합니다.</span>
+      </div>
+    </button>
+    <button type="button" class="action-card" id="startLookupCard">
+      <div class="action-icon">🔎</div>
+      <div class="action-text">
+        <strong>신청 조회</strong>
+        <span>진행 상태를 확인하고 관리자와 대화할 수 있습니다.</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- A/S 신청 영역 -->
+  <div id="applySection" class="hidden">
+    <div class="customer-subview-head">
+      <button type="button" class="btn btn-outline btn-sm" id="backToMenuFromApply">← 메뉴로</button>
+      <div class="summary">단계별 안내를 따라 신청서를 작성해주세요.</div>
+    </div>
+    <form class="card" id="receiptForm" novalidate>
+    <div class="step-indicator" id="stepIndicator"></div>
+    <div class="form-step active" data-step="0">
     <div class="field" data-field="customer_name">
       <label>이름 <span class="req">*</span></label>
       <input type="text" id="customer_name" placeholder="홍길동" maxlength="20" autocomplete="name" />
@@ -245,6 +356,18 @@
       <label>연락처 <span class="req">*</span></label>
       <input type="tel" id="phone" placeholder="010-1234-5678" maxlength="13" autocomplete="tel" inputmode="numeric" />
       <div class="error-msg">올바른 전화번호 형식이 아닙니다.</div>
+    </div>
+
+    <div class="field" data-field="receipt_password">
+      <label>A/S 접수 비밀번호 <span class="req">*</span></label>
+      <input type="password" id="receipt_password" placeholder="진행상황 조회용 비밀번호를 입력해주세요" maxlength="30" autocomplete="new-password" />
+      <div class="error-msg">비밀번호를 4자 이상 입력해주세요.</div>
+    </div>
+
+    <div class="field" data-field="receipt_password_confirm">
+      <label>접수비밀번호 확인 <span class="req">*</span></label>
+      <input type="password" id="receipt_password_confirm" placeholder="비밀번호를 다시 입력해주세요" maxlength="30" autocomplete="new-password" />
+      <div class="error-msg">비밀번호가 일치하지 않습니다.</div>
     </div>
 
     <div class="field" data-field="purchase_channel">
@@ -284,6 +407,17 @@
       <div class="preview-grid" id="previewGrid"></div>
     </div>
 
+    <div class="field">
+      <label id="videoUploadLabel">영상 첨부 <span class="opt">(선택 · 최대 2개, 각 30MB 이하)</span></label>
+      <div class="upload-zone" id="videoUploadZone">
+        <div class="icon">🎥</div>
+        <p><span class="upload-cta">영상 선택</span> 또는 끌어다 놓기</p>
+        <p style="font-size:11px;margin-top:4px;">MP4, MOV, WEBM 권장</p>
+      </div>
+      <input type="file" id="videoFileInput" accept="video/*" multiple class="hidden" />
+      <div class="preview-grid" id="videoPreviewGrid"></div>
+    </div>
+
     <div class="field" data-field="privacy_agreed">
       <div class="checkbox-wrap" id="privacyCheckWrap">
         <input type="checkbox" id="privacy_agreed" />
@@ -295,8 +429,113 @@
       <div class="error-msg">개인정보 수집·이용에 동의해주세요.</div>
     </div>
 
-    <button type="submit" class="submit-btn" id="submitBtn">A/S 접수하기</button>
-  </form>
+    <div class="wizard-nav wizard-nav-end">
+      <button type="button" class="btn btn-primary" id="goStep1Btn">다음</button>
+    </div>
+    </div>
+
+    <div class="form-step" data-step="1">
+      <div class="guide-card">
+        <h3 id="repairGuideTitle">수리 안내</h3>
+        <p id="repairGuideText"></p>
+        <div class="guide-image-wrap">
+          <img id="repairGuideImage" class="guide-image hidden" alt="수리 안내 이미지" />
+          <div class="guide-empty" id="repairGuideImageEmpty">관리자 페이지에서 수리안내 JPG와 텍스트를 등록해주세요.</div>
+        </div>
+      </div>
+      <div class="guide-card">
+        <h4 id="pickupGuideTitle">회수 안내</h4>
+        <p id="pickupGuideText"></p>
+      </div>
+      <div class="wizard-nav">
+        <button type="button" class="btn btn-outline" data-prev-step>이전</button>
+        <button type="button" class="btn btn-primary" data-next-step>다음</button>
+      </div>
+    </div>
+
+    <div class="form-step" data-step="2">
+      <div class="guide-card">
+        <h3 id="costGuideTitle">비용 발생 안내</h3>
+        <p id="costGuideText"></p>
+        <div class="guide-image-wrap">
+          <img id="costGuideImage" class="guide-image hidden" alt="비용 안내 이미지" />
+          <div class="guide-empty" id="costGuideImageEmpty">관리자 페이지에서 비용안내 JPG와 텍스트를 등록해주세요.</div>
+        </div>
+        <div class="guide-note" id="costGuideNote"></div>
+      </div>
+      <div class="wizard-nav">
+        <button type="button" class="btn btn-outline" data-prev-step>이전</button>
+        <button type="button" class="btn btn-primary" data-next-step>다음</button>
+      </div>
+    </div>
+
+    <div class="form-step" data-step="3">
+      <div class="guide-card">
+        <h3 id="shippingGuideTitle">A/S 제품을 보내주시는 방법</h3>
+        <p id="shippingGuideText"></p>
+      </div>
+      <div class="field" data-field="shipping_method">
+        <label>A/S 제품을 보내주시는 방법 <span class="req">*</span></label>
+        <select id="shipping_method">
+          <option value="">선택해주세요</option>
+          <option value="courier_pickup">택배사 회수 요청</option>
+          <option value="direct_shipping">직접 발송</option>
+          <option value="head_office_visit">본사 방문</option>
+        </select>
+        <div class="error-msg">보내주시는 방법을 선택해주세요.</div>
+      </div>
+      <div class="info-box" id="shippingMethodInfo">택배사 회수 요청, 직접 발송, 본사 방문 중 하나를 선택해주세요.</div>
+      <div class="wizard-nav">
+        <button type="button" class="btn btn-outline" data-prev-step>이전</button>
+        <button type="button" class="btn btn-primary" data-next-step>다음</button>
+      </div>
+    </div>
+
+    <div class="form-step" data-step="4">
+      <div class="guide-card">
+        <h3 id="reviewStepTitle">최종 확인</h3>
+        <p id="reviewStepText">입력하신 내용을 마지막으로 확인해주세요. 이전/다음으로 이동해도 작성한 내용은 그대로 유지됩니다.</p>
+        <div class="review-grid" id="reviewGrid"></div>
+      </div>
+      <div class="wizard-nav">
+        <button type="button" class="btn btn-outline" data-prev-step>이전</button>
+        <button type="button" class="btn btn-outline" id="reviewNextBtn">다음</button>
+        <button type="submit" class="submit-btn" id="submitBtn">신청완료</button>
+      </div>
+    </div>
+    </form>
+  </div>
+
+  <!-- 신청 조회 영역 -->
+  <section id="lookupSection" class="card hidden">
+    <div class="customer-subview-head">
+      <button type="button" class="btn btn-outline btn-sm" id="backToMenuFromLookup">← 메뉴로</button>
+      <div class="summary">이름·연락처·접수 비밀번호로 신청 내역을 조회합니다.</div>
+    </div>
+    <div class="lookup-form-grid">
+      <div class="field">
+        <label>이름</label>
+        <input type="text" id="lookupName" placeholder="홍길동" maxlength="20" autocomplete="name" />
+      </div>
+      <div class="field">
+        <label>연락처</label>
+        <input type="tel" id="lookupPhone" placeholder="010-1234-5678" maxlength="13" inputmode="numeric" autocomplete="tel" />
+      </div>
+      <div class="field">
+        <label>접수 비밀번호</label>
+        <input type="password" id="lookupPassword" placeholder="접수 시 입력한 비밀번호" maxlength="30" autocomplete="current-password" />
+      </div>
+    </div>
+    <div class="wizard-nav wizard-nav-end">
+      <button type="button" class="btn btn-outline" id="lookupResetBtn">초기화</button>
+      <button type="button" class="btn btn-primary" id="lookupSearchBtn">신청 조회</button>
+    </div>
+    <div class="lookup-status-row">
+      <div class="lookup-summary" id="lookupSummaryText">조회할 정보를 입력해주세요.</div>
+      <span class="realtime-pill hidden" id="lookupRealtimePill">실시간 자동 새로고침</span>
+    </div>
+    <div id="lookupResults"></div>
+  </section>
 </main>
 
 <!-- 완료 페이지 -->
@@ -367,11 +606,12 @@
     <!-- 탭 1: 접수 목록 -->
     <div class="tab-pane" id="tab-receipts">
       <div class="stats-grid">
-        <div class="stat-card"><div class="label">오늘 신규</div><div class="value" id="statToday">0</div></div>
-        <div class="stat-card" style="border-left-color:#EAB308;"><div class="label">확인중</div><div class="value" id="statChecking">0</div></div>
-        <div class="stat-card" style="border-left-color:#2563EB;"><div class="label">처리중</div><div class="value" id="statProcessing">0</div></div>
-        <div class="stat-card" style="border-left-color:#16A34A;"><div class="label">처리완료</div><div class="value" id="statCompleted">0</div></div>
-        <div class="stat-card" style="border-left-color:#6B7280;"><div class="label">전체</div><div class="value" id="statTotal">0</div></div>
+        <div class="stat-card" data-quick-filter="today" style="--accent:#1B4332;"><div class="label">오늘 신규</div><div class="value" id="statToday">0</div></div>
+        <div class="stat-card" data-quick-filter="as_received_done" style="--accent:#EAB308;"><div class="label">A/S 접수완료</div><div class="value" id="statChecking">0</div></div>
+        <div class="stat-card" data-quick-filter="pickup_group" style="--accent:#F97316;"><div class="label">회수/입고</div><div class="value" id="statPickup">0</div></div>
+        <div class="stat-card" data-quick-filter="as_processing" style="--accent:#2563EB;"><div class="label">A/S 처리중</div><div class="value" id="statProcessing">0</div></div>
+        <div class="stat-card" data-quick-filter="shipment_sent" style="--accent:#16A34A;"><div class="label">택배발송 완료</div><div class="value" id="statCompleted">0</div></div>
+        <div class="stat-card active" data-quick-filter="all" style="--accent:#6B7280;"><div class="label">전체</div><div class="value" id="statTotal">0</div></div>
       </div>
 
       <div class="filter-bar">
@@ -381,10 +621,12 @@
           <select id="filterChannel"><option value="">전체 구매처</option></select>
           <select id="filterStatus">
             <option value="">전체 상태</option>
-            <option value="received">접수완료</option>
-            <option value="checking">확인중</option>
-            <option value="processing">처리중</option>
-            <option value="completed">처리완료</option>
+            <option value="as_received">A/S 접수</option>
+            <option value="as_received_done">A/S 접수완료</option>
+            <option value="pickup_in_progress">회수진행중</option>
+            <option value="warehouse_received">입고완료</option>
+            <option value="as_processing">A/S 처리중</option>
+            <option value="shipment_sent">택배발송 완료</option>
           </select>
           <input type="text" id="filterSearch" placeholder="이름/연락처/접수번호" />
           <button class="btn btn-primary btn-sm" id="resetFilterBtn">초기화</button>
@@ -398,7 +640,7 @@
       <div class="table-wrap">
         <table>
           <thead><tr>
-            <th>접수번호</th><th>접수일시</th><th>이름</th><th>연락처</th><th>구매처</th><th>제품명</th><th>구매일</th><th>사진</th><th>상태</th><th>액션</th>
+            <th>접수번호</th><th>접수일시</th><th>이름</th><th>연락처</th><th>구매처</th><th>제품명</th><th>구매일</th><th>첨부</th><th>상태</th><th>액션</th>
           </tr></thead>
           <tbody id="receiptTableBody"></tbody>
         </table>
@@ -431,6 +673,65 @@
         <div class="field" style="margin-top:8px;">
           <label>메인 페이지 안내 문구 (줄바꿈 가능)</label>
           <textarea data-edit="content.introDesc" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h3><span class="section-icon">🧭</span> 단계별 안내 페이지</h3>
+        <p class="desc">1페이지 이후에 노출되는 안내 페이지의 텍스트와 JPG 이미지 URL을 설정합니다.</p>
+        <div class="editor-grid">
+          <div class="field">
+            <label>수리 안내 제목</label>
+            <input type="text" data-edit="content.repairGuideTitle" />
+          </div>
+          <div class="field">
+            <label>수리 안내 JPG URL</label>
+            <input type="text" data-edit="content.repairGuideImage" placeholder="https://...jpg" />
+          </div>
+          <div class="field">
+            <label>회수 안내 제목</label>
+            <input type="text" data-edit="content.pickupGuideTitle" />
+          </div>
+          <div class="field">
+            <label>비용 안내 제목</label>
+            <input type="text" data-edit="content.costGuideTitle" />
+          </div>
+          <div class="field">
+            <label>비용 안내 JPG URL</label>
+            <input type="text" data-edit="content.costGuideImage" placeholder="https://...jpg" />
+          </div>
+          <div class="field">
+            <label>발송 방법 페이지 제목</label>
+            <input type="text" data-edit="content.shippingGuideTitle" />
+          </div>
+          <div class="field">
+            <label>최종 확인 제목</label>
+            <input type="text" data-edit="content.reviewStepTitle" />
+          </div>
+        </div>
+        <div class="field">
+          <label>수리 안내 문구</label>
+          <textarea data-edit="content.repairGuideText" rows="4"></textarea>
+        </div>
+        <div class="field">
+          <label>회수 안내 문구</label>
+          <textarea data-edit="content.pickupGuideText" rows="4"></textarea>
+        </div>
+        <div class="field">
+          <label>비용 안내 문구</label>
+          <textarea data-edit="content.costGuideText" rows="4"></textarea>
+        </div>
+        <div class="field">
+          <label>비용 안내 강조 문구</label>
+          <textarea data-edit="content.costGuideNote" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label>발송 방법 안내 문구</label>
+          <textarea data-edit="content.shippingGuideText" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label>최종 확인 안내 문구</label>
+          <textarea data-edit="content.reviewStepText" rows="3"></textarea>
         </div>
       </div>
 
@@ -726,10 +1027,17 @@ async function metaSet(key, value) {
   });
 }
 
-/* 이미지 업로드 -> Storage */
-async function uploadImageToStorage(bucket, fileName, dataUrl) {
-  const dataRes = await fetch(dataUrl);
-  const blob = await dataRes.blob();
+/* 파일 업로드 -> Storage */
+async function uploadFileToStorage(bucket, fileName, fileOrDataUrl) {
+  let body = fileOrDataUrl;
+  let contentType = fileOrDataUrl?.type || 'application/octet-stream';
+
+  if (typeof fileOrDataUrl === 'string' && fileOrDataUrl.startsWith('data:')) {
+    const dataRes = await fetch(fileOrDataUrl);
+    const blob = await dataRes.blob();
+    body = blob;
+    contentType = blob.type || 'application/octet-stream';
+  }
 
   const safeName = fileName.replace(/[^a-z0-9._-]/gi, '_');
   const path = `${Date.now()}_${safeName}`;
@@ -739,10 +1047,10 @@ async function uploadImageToStorage(bucket, fileName, dataUrl) {
     headers: {
       apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type': blob.type || 'image/jpeg',
+      'Content-Type': contentType,
       'x-upsert': 'true'
     },
-    body: blob
+    body
   });
 
   if (!upRes.ok) {
@@ -751,6 +1059,9 @@ async function uploadImageToStorage(bucket, fileName, dataUrl) {
   }
 
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
+}
+async function uploadImageToStorage(bucket, fileName, dataUrl) {
+  return uploadFileToStorage(bucket, fileName, dataUrl);
 }
 
 /* 설정 키 확인 */
@@ -771,6 +1082,20 @@ const DEFAULT_SETTINGS = {
     introTitle: '제품 A/S 접수',
     introDesc: '오투라이프캠핑 · AirNOK 제품에 대한 A/S를\n온라인으로 간편하게 신청하세요.',
     uploadLabel: '사진 첨부 (선택 · 최대 5장, 각 5MB 이하)',
+    videoUploadLabel: '영상 첨부 (선택 · 최대 2개, 각 30MB 이하)',
+    repairGuideTitle: '수리 안내',
+    repairGuideText: '사용 미숙 또는 외부 충격으로 인한 손상은 수리 가능 여부가 제한될 수 있습니다.\n빔 찌그러짐, 원단 찢김, 임의 개조 등은 상태 확인 후 안내드립니다.',
+    repairGuideImage: '',
+    pickupGuideTitle: '회수 안내',
+    pickupGuideText: '회수 진행이 필요한 경우 담당자가 접수 내용을 확인한 뒤 순차적으로 연락드립니다.\n접수 후 연락처를 꼭 확인해주세요.',
+    costGuideTitle: '비용 발생 안내',
+    costGuideText: '제품 상태와 손상 원인에 따라 유상 수리 또는 추가 비용이 발생할 수 있습니다.\n최종 비용은 실물 확인 후 별도 안내됩니다.',
+    costGuideImage: '',
+    costGuideNote: '고객 과실, 사용 미숙, 소모품 교체, 운송비 등은 비용이 발생할 수 있습니다.',
+    shippingGuideTitle: 'A/S 제품을 보내주시는 방법',
+    shippingGuideText: '원하시는 접수 방법을 선택해주세요.',
+    reviewStepTitle: '최종 확인',
+    reviewStepText: '입력하신 내용을 마지막으로 확인해주세요. 이전/다음으로 이동해도 작성 내용은 그대로 유지됩니다.',
     completeIcon: '✓',
     completeTitle: '접수가 완료되었습니다',
     completeDesc: '아래 접수번호로 처리 상태를 확인하실 수 있습니다.',
@@ -869,6 +1194,20 @@ function applySettings() {
   document.getElementById('introTitle').textContent = settings.content.introTitle;
   document.getElementById('introDesc').innerHTML = escapeHtml(settings.content.introDesc).replace(/\n/g, '<br/>');
   document.getElementById('uploadLabel').innerHTML = settings.content.uploadLabel.replace(/\((.*?)\)/, '<span class="opt">($1)</span>');
+  document.getElementById('videoUploadLabel').innerHTML = settings.content.videoUploadLabel.replace(/\((.*?)\)/, '<span class="opt">($1)</span>');
+  document.getElementById('repairGuideTitle').textContent = settings.content.repairGuideTitle;
+  document.getElementById('repairGuideText').textContent = settings.content.repairGuideText;
+  document.getElementById('pickupGuideTitle').textContent = settings.content.pickupGuideTitle;
+  document.getElementById('pickupGuideText').textContent = settings.content.pickupGuideText;
+  document.getElementById('costGuideTitle').textContent = settings.content.costGuideTitle;
+  document.getElementById('costGuideText').textContent = settings.content.costGuideText;
+  document.getElementById('costGuideNote').textContent = settings.content.costGuideNote;
+  document.getElementById('shippingGuideTitle').textContent = settings.content.shippingGuideTitle;
+  document.getElementById('shippingGuideText').textContent = settings.content.shippingGuideText;
+  document.getElementById('reviewStepTitle').textContent = settings.content.reviewStepTitle;
+  document.getElementById('reviewStepText').textContent = settings.content.reviewStepText;
+  setOptionalImage('repairGuideImage', 'repairGuideImageEmpty', settings.content.repairGuideImage);
+  setOptionalImage('costGuideImage', 'costGuideImageEmpty', settings.content.costGuideImage);
   document.getElementById('completeIcon').textContent = settings.content.completeIcon;
   document.getElementById('completeTitle').textContent = settings.content.completeTitle;
   document.getElementById('completeDesc').textContent = settings.content.completeDesc;
@@ -938,7 +1277,85 @@ function channelLabel(value) {
 }
 
 /* ============== 유틸 ============== */
-const STATUS_LABELS = { received:'접수완료', checking:'확인중', processing:'처리중', completed:'처리완료' };
+const STATUS_LABELS = {
+  as_received:'A/S 접수',
+  as_received_done:'A/S 접수완료',
+  pickup_in_progress:'회수진행중',
+  warehouse_received:'입고완료',
+  as_processing:'A/S 처리중',
+  shipment_sent:'택배발송 완료'
+};
+const LEGACY_STATUS_MAP = {
+  received:'as_received',
+  checking:'as_received_done',
+  processing:'as_processing',
+  completed:'shipment_sent'
+};
+function normalizeStatus(status) {
+  return LEGACY_STATUS_MAP[status] || (STATUS_LABELS[status] ? status : 'as_received');
+}
+function guessAttachmentType(url='') {
+  return /\.(mp4|mov|webm|m4v|avi)(\?|$)/i.test(String(url)) ? 'video' : 'image';
+}
+function getAttachments(record) {
+  const raw = Array.isArray(record?.image_urls) ? record.image_urls : [];
+  return raw.map(item => {
+    if (typeof item === 'string') return { type: guessAttachmentType(item), url: item };
+    if (item && typeof item === 'object' && item.url) return { type: item.type || guessAttachmentType(item.url), url: item.url };
+    return null;
+  }).filter(Boolean);
+}
+function getImageUrls(record) {
+  return getAttachments(record).filter(item => item.type === 'image').map(item => item.url);
+}
+function getVideoUrls(record) {
+  return getAttachments(record).filter(item => item.type === 'video').map(item => item.url);
+}
+function normalizeReceipt(record) {
+  if (!record) return record;
+  return {
+    ...record,
+    status: normalizeStatus(record.status),
+    status_logs: Array.isArray(record.status_logs) ? record.status_logs.map(log => ({
+      ...log,
+      from: log?.from ? normalizeStatus(log.from) : null,
+      to: normalizeStatus(log?.to)
+    })) : []
+  };
+}
+function getReceiptPasswordHash(record) {
+  const logs = Array.isArray(record?.status_logs) ? record.status_logs : [];
+  const found = logs.find(log => log?.receipt_password_hash);
+  return found?.receipt_password_hash || '';
+}
+function getStatusChangeLogs(record) {
+  return (Array.isArray(record?.status_logs) ? record.status_logs : []).filter(l => l && l.to);
+}
+function getChatLogs(record) {
+  return (Array.isArray(record?.status_logs) ? record.status_logs : []).filter(l => l && l.type === 'chat' && l.message);
+}
+const SHIPPING_METHOD_LABELS = {
+  courier_pickup:'택배사 회수 요청',
+  direct_shipping:'직접 발송',
+  head_office_visit:'본사 방문 (부산광역시 금정구 공단로 68-23, 동성아이앤씨)'
+};
+function shippingMethodLabel(value) {
+  return SHIPPING_METHOD_LABELS[value] || '-';
+}
+function setOptionalImage(imgId, emptyId, url) {
+  const img = document.getElementById(imgId);
+  const empty = document.getElementById(emptyId);
+  if (!img || !empty) return;
+  if (url) {
+    img.src = url;
+    img.classList.remove('hidden');
+    empty.classList.add('hidden');
+  } else {
+    img.removeAttribute('src');
+    img.classList.add('hidden');
+    empty.classList.remove('hidden');
+  }
+}
 function pad(n,len=2){return String(n).padStart(len,'0');}
 function formatDate(d,withTime=false){const dt=(d instanceof Date)?d:new Date(d);const s=`${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;return withTime?`${s} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`:s;}
 function todayStr(){return formatDate(new Date());}
@@ -994,7 +1411,51 @@ function showPage(name){Object.values(PAGES).forEach(p=>p.classList.add('hidden'
 
 /* ============== 고객 페이지 ============== */
 const form = document.getElementById('receiptForm');
-const state = { channel:'', images:[] };
+const state = { channel:'', images:[], videos:[] };
+
+/* ----- 진입 분기 (신청 / 조회) ----- */
+const CUSTOMER_MODES = {
+  menu: document.getElementById('entrySelector'),
+  apply: document.getElementById('applySection'),
+  lookup: document.getElementById('lookupSection')
+};
+const lookupState = { active:false, timer:null, name:'', phone:'', password:'', passwordHash:'' };
+function stopLookupPolling() {
+  if (lookupState.timer) { clearInterval(lookupState.timer); lookupState.timer = null; }
+}
+function setCustomerMode(mode) {
+  Object.entries(CUSTOMER_MODES).forEach(([key, el]) => {
+    if (!el) return;
+    el.classList.toggle('hidden', key !== mode);
+  });
+  if (mode !== 'lookup') {
+    lookupState.active = false;
+    stopLookupPolling();
+  }
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+function resetLookupView(clearInputs) {
+  if (clearInputs) {
+    const n = document.getElementById('lookupName');
+    const ph = document.getElementById('lookupPhone');
+    const pw = document.getElementById('lookupPassword');
+    if (n) n.value = '';
+    if (ph) ph.value = '';
+    if (pw) pw.value = '';
+  }
+  lookupState.active = false;
+  lookupState.name = '';
+  lookupState.phone = '';
+  lookupState.password = '';
+  lookupState.passwordHash = '';
+  stopLookupPolling();
+  const summary = document.getElementById('lookupSummaryText');
+  const pill = document.getElementById('lookupRealtimePill');
+  const results = document.getElementById('lookupResults');
+  if (summary) summary.textContent = '조회할 정보를 입력해주세요.';
+  if (pill) pill.classList.add('hidden');
+  if (results) results.innerHTML = '';
+}
 
 const urlParams = new URLSearchParams(location.search);
 if (urlParams.get('product')) document.getElementById('product_name').value = urlParams.get('product');
@@ -1002,14 +1463,57 @@ if (urlParams.get('product')) document.getElementById('product_name').value = ur
 document.getElementById('phone').addEventListener('input', e => e.target.value = formatPhone(e.target.value));
 document.getElementById('issue_detail').addEventListener('input', e => document.getElementById('issueCount').textContent = e.target.value.length);
 
+/* 진입 카드 & 뒤로가기 바인딩 */
+document.getElementById('startApplyCard').addEventListener('click', () => {
+  setCustomerMode('apply');
+  if (typeof showFormStep === 'function') showFormStep(0);
+});
+document.getElementById('startLookupCard').addEventListener('click', () => {
+  setCustomerMode('lookup');
+  resetLookupView(false);
+});
+document.getElementById('backToMenuFromApply').addEventListener('click', () => setCustomerMode('menu'));
+document.getElementById('backToMenuFromLookup').addEventListener('click', () => {
+  resetLookupView(false);
+  setCustomerMode('menu');
+});
+const _lookupPhoneEl = document.getElementById('lookupPhone');
+if (_lookupPhoneEl) _lookupPhoneEl.addEventListener('input', e => e.target.value = formatPhone(e.target.value));
+setCustomerMode('menu');
+resetLookupView(false);
+
 const uploadZone = document.getElementById('uploadZone');
 const fileInput = document.getElementById('fileInput');
 const previewGrid = document.getElementById('previewGrid');
+const videoUploadZone = document.getElementById('videoUploadZone');
+const videoFileInput = document.getElementById('videoFileInput');
+const videoPreviewGrid = document.getElementById('videoPreviewGrid');
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
 uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
+videoUploadZone.addEventListener('click', () => videoFileInput.click());
+videoUploadZone.addEventListener('dragover', e => { e.preventDefault(); videoUploadZone.classList.add('dragover'); });
+videoUploadZone.addEventListener('dragleave', () => videoUploadZone.classList.remove('dragover'));
+videoUploadZone.addEventListener('drop', e => { e.preventDefault(); videoUploadZone.classList.remove('dragover'); handleVideoFiles(e.dataTransfer.files); });
+videoFileInput.addEventListener('change', e => handleVideoFiles(e.target.files));
+
+function getFileExt(name='') {
+  const clean = String(name).split('?')[0];
+  const idx = clean.lastIndexOf('.');
+  return idx > -1 ? clean.slice(idx + 1).toLowerCase() : '';
+}
+function revokeVideoPreview(video) {
+  if (video?.previewUrl) URL.revokeObjectURL(video.previewUrl);
+}
+function resetMediaState() {
+  state.images = [];
+  state.videos.forEach(revokeVideoPreview);
+  state.videos = [];
+  if (fileInput) fileInput.value = '';
+  if (videoFileInput) videoFileInput.value = '';
+}
 
 async function handleFiles(files) {
   const remaining = 5 - state.images.length;
@@ -1026,16 +1530,322 @@ async function handleFiles(files) {
   renderPreview();
 }
 
+async function handleVideoFiles(files) {
+  const remaining = 2 - state.videos.length;
+  const toProcess = Array.from(files).slice(0, remaining);
+  if (files.length > remaining) showToast('영상은 최대 2개까지 첨부 가능합니다','error');
+  for (const file of toProcess) {
+    if (!file.type.startsWith('video/')) { showToast('영상 파일만 가능합니다','error'); continue; }
+    if (file.size > 30*1024*1024) { showToast('30MB 이하 영상만 가능합니다','error'); continue; }
+    state.videos.push({ file, name:file.name, previewUrl: URL.createObjectURL(file) });
+  }
+  renderVideoPreview();
+}
+
 function renderPreview() {
   previewGrid.innerHTML = state.images.map((img,idx) =>
-    `<div class="preview-item"><img src="${img.dataUrl}" /><button type="button" class="remove-btn" data-idx="${idx}">×</button></div>`
+    `<div class="preview-item"><img src="${img.dataUrl}" /><span class="file-badge">사진</span><button type="button" class="remove-btn" data-idx="${idx}">×</button></div>`
   ).join('');
   previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
     btn.onclick = () => { state.images.splice(parseInt(btn.dataset.idx),1); renderPreview(); };
   });
 }
+function renderVideoPreview() {
+  videoPreviewGrid.innerHTML = state.videos.map((video,idx) =>
+    `<div class="preview-item"><video src="${video.previewUrl}" muted playsinline controls></video><span class="file-badge">영상</span><button type="button" class="remove-btn" data-idx="${idx}">×</button></div>`
+  ).join('');
+  videoPreviewGrid.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.idx);
+      revokeVideoPreview(state.videos[idx]);
+      state.videos.splice(idx,1);
+      renderVideoPreview();
+    };
+  });
+}
 
 document.getElementById('viewTermsBtn').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); showPrivacyModal(); });
+
+const FORM_STEPS = Array.from(document.querySelectorAll('.form-step'));
+const STEP_TITLES = ['기본정보', '수리/회수 안내', '비용 안내', '발송 방법', '최종 확인'];
+let currentFormStep = 0;
+let reviewCursor = -1;
+
+function getFormData() {
+  return {
+    customer_name: document.getElementById('customer_name').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    receipt_password: document.getElementById('receipt_password').value.trim(),
+    receipt_password_confirm: document.getElementById('receipt_password_confirm').value.trim(),
+    purchase_channel: state.channel,
+    product_name: document.getElementById('product_name').value.trim(),
+    purchase_date: document.getElementById('purchase_date').value,
+    issue_detail: document.getElementById('issue_detail').value.trim(),
+    shipping_method: document.getElementById('shipping_method')?.value || '',
+    privacy_agreed: document.getElementById('privacy_agreed').checked,
+  };
+}
+function clearFieldErrors() {
+  document.querySelectorAll('.field').forEach(f => f.classList.remove('error'));
+}
+function renderStepIndicator() {
+  const wrap = document.getElementById('stepIndicator');
+  if (!wrap) return;
+  wrap.innerHTML = STEP_TITLES.map((title, idx) => {
+    const cls = idx === currentFormStep ? 'step-chip active' : idx < currentFormStep ? 'step-chip done' : 'step-chip';
+    return `<div class="${cls}" data-step="${idx + 1}">${escapeHtml(title)}</div>`;
+  }).join('');
+}
+function updateShippingMethodInfo() {
+  const value = document.getElementById('shipping_method')?.value || '';
+  const box = document.getElementById('shippingMethodInfo');
+  if (!box) return;
+  if (value === 'courier_pickup') {
+    box.textContent = '택배사 회수 요청 선택 시 접수 내용을 확인한 뒤 회수 가능 여부와 일정을 별도로 안내드립니다.';
+  } else if (value === 'direct_shipping') {
+    box.textContent = '직접 발송 선택 시 포장 후 발송해주시고, 발송 전/후 운송장 정보를 별도로 보관해주세요.';
+  } else if (value === 'head_office_visit') {
+    box.textContent = '본사 방문 주소: 부산광역시 금정구 공단로 68-23, 동성아이앤씨';
+  } else {
+    box.textContent = '택배사 회수 요청, 직접 발송, 본사 방문 중 하나를 선택해주세요.';
+  }
+}
+function renderReview() {
+  const data = getFormData();
+  const reviewGrid = document.getElementById('reviewGrid');
+  if (!reviewGrid) return;
+  reviewGrid.innerHTML = `
+    <div class="review-card">
+      <h4>기본 정보</h4>
+      <div class="review-list">
+        <div class="review-label">이름</div><div class="review-value">${escapeHtml(data.customer_name || '-')}</div>
+        <div class="review-label">연락처</div><div class="review-value">${escapeHtml(data.phone || '-')}</div>
+        <div class="review-label">구매처</div><div class="review-value">${escapeHtml(channelLabel(data.purchase_channel) || '-')}</div>
+        <div class="review-label">제품명</div><div class="review-value">${escapeHtml(data.product_name || '-')}</div>
+        <div class="review-label">구매일</div><div class="review-value">${escapeHtml(data.purchase_date || '-')}</div>
+      </div>
+    </div>
+    <div class="review-card">
+      <h4>접수 내용</h4>
+      <div class="review-list">
+        <div class="review-label">A/S 내용</div><div class="review-value">${escapeHtml(data.issue_detail || '-')}</div>
+        <div class="review-label">첨부 파일</div><div class="review-value"><div class="review-inline-badges"><span class="badge badge-as_received">📷 사진 ${state.images.length}장</span><span class="badge badge-as_processing">🎥 영상 ${state.videos.length}개</span></div></div>
+        <div class="review-label">개인정보 동의</div><div class="review-value">${data.privacy_agreed ? '동의함' : '미동의'}</div>
+      </div>
+    </div>
+    <div class="review-card">
+      <h4>접수 진행 정보</h4>
+      <div class="review-list">
+        <div class="review-label">접수 비밀번호</div><div class="review-value">${data.receipt_password ? '●'.repeat(Math.min(data.receipt_password.length, 10)) : '-'}</div>
+        <div class="review-label">발송 방법</div><div class="review-value">${escapeHtml(shippingMethodLabel(data.shipping_method))}</div>
+      </div>
+    </div>`;
+  reviewCursor = -1;
+}
+function focusNextReviewCard() {
+  const cards = Array.from(document.querySelectorAll('#reviewGrid .review-card'));
+  if (!cards.length) return;
+  reviewCursor = (reviewCursor + 1) % cards.length;
+  cards.forEach((card, idx) => card.classList.toggle('active', idx === reviewCursor));
+  cards[reviewCursor].scrollIntoView({ behavior:'smooth', block:'center' });
+}
+function showFormStep(stepIdx) {
+  currentFormStep = Math.max(0, Math.min(stepIdx, FORM_STEPS.length - 1));
+  FORM_STEPS.forEach((step, idx) => step.classList.toggle('active', idx === currentFormStep));
+  renderStepIndicator();
+  if (currentFormStep === 3) updateShippingMethodInfo();
+  if (currentFormStep === 4) renderReview();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+function validateStep(stepIdx) {
+  const data = getFormData();
+  clearFieldErrors();
+  let valid = true;
+  if (stepIdx === 0) {
+    if (data.customer_name.length < 2) { document.querySelector('[data-field="customer_name"]').classList.add('error'); valid=false; }
+    if (!/^010-\d{4}-\d{4}$/.test(data.phone)) { document.querySelector('[data-field="phone"]').classList.add('error'); valid=false; }
+    if (data.receipt_password.length < 4) { document.querySelector('[data-field="receipt_password"]').classList.add('error'); valid=false; }
+    if (!data.receipt_password_confirm || data.receipt_password !== data.receipt_password_confirm) { document.querySelector('[data-field="receipt_password_confirm"]').classList.add('error'); valid=false; }
+    if (!data.purchase_channel) { document.querySelector('[data-field="purchase_channel"]').classList.add('error'); valid=false; }
+    if (!data.product_name) { document.querySelector('[data-field="product_name"]').classList.add('error'); valid=false; }
+    if (!data.purchase_date) { document.querySelector('[data-field="purchase_date"]').classList.add('error'); valid=false; }
+    if (data.issue_detail.length < 10) { document.querySelector('[data-field="issue_detail"]').classList.add('error'); valid=false; }
+    if (!data.privacy_agreed) { document.querySelector('[data-field="privacy_agreed"]').classList.add('error'); valid=false; }
+  }
+  if (stepIdx === 3) {
+    if (!data.shipping_method) { document.querySelector('[data-field="shipping_method"]').classList.add('error'); valid=false; }
+  }
+  if (!valid) {
+    showToast('빨간색 표시된 항목을 확인해주세요', 'error');
+    const fe = document.querySelector('.field.error');
+    if (fe) fe.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+  return valid;
+}
+
+document.getElementById('goStep1Btn').addEventListener('click', () => {
+  if (!validateStep(0)) return;
+  showFormStep(1);
+});
+document.querySelectorAll('[data-prev-step]').forEach(btn => btn.addEventListener('click', () => showFormStep(currentFormStep - 1)));
+document.querySelectorAll('[data-next-step]').forEach(btn => btn.addEventListener('click', () => {
+  if (currentFormStep === 3 && !validateStep(3)) return;
+  showFormStep(currentFormStep + 1);
+}));
+document.getElementById('shipping_method').addEventListener('change', updateShippingMethodInfo);
+
+/* ============== 신청 조회 / 실시간 대화 ============== */
+function buildChatThreadHtml(chatLogs) {
+  if (!chatLogs.length) return '<div class="chat-empty">아직 등록된 대화가 없습니다. 아래에 메시지를 남겨주세요.</div>';
+  return `<div class="chat-thread">${chatLogs.map(log => {
+    const side = log.actor === 'customer' ? 'customer' : 'admin';
+    const by = log.by || (log.actor === 'customer' ? '고객' : '관리자');
+    return `<div class="chat-bubble ${side}"><div class="chat-meta">${escapeHtml(by)} · ${formatDate(log.at, true)}</div><div class="chat-message">${escapeHtml(log.message || '')}</div></div>`;
+  }).join('')}</div>`;
+}
+async function appendChatMessage(receiptId, actor, message) {
+  const current = normalizeReceipt(await dbGet(receiptId));
+  if (!current) throw new Error('접수 정보를 찾을 수 없습니다');
+  const newLog = {
+    type: 'chat',
+    actor: actor,
+    by: actor === 'customer' ? '고객' : '관리자',
+    message: String(message),
+    at: new Date().toISOString()
+  };
+  const updated = {
+    id: current.id,
+    status_logs: [...(current.status_logs || []), newLog],
+    updated_at: new Date().toISOString()
+  };
+  await dbUpdate(updated);
+  return updated;
+}
+function renderLookupResults(matched) {
+  const results = document.getElementById('lookupResults');
+  if (!results) return;
+  if (!matched.length) {
+    results.innerHTML = '<div class="empty-state" style="padding:30px 16px;">조회된 신청 내역이 없습니다.</div>';
+    return;
+  }
+  results.innerHTML = matched.map(r => {
+    const statusLogs = getStatusChangeLogs(r);
+    const chatLogs = getChatLogs(r);
+    const imgs = getImageUrls(r).length;
+    const vids = getVideoUrls(r).length;
+    return `
+      <article class="lookup-result-card">
+        <div class="lookup-result-head">
+          <div class="lookup-result-title">
+            <strong>${escapeHtml(r.receipt_no)}</strong>
+            <div class="lookup-result-sub">${escapeHtml(r.product_name || '-')} · ${formatDate(r.created_at, true)}</div>
+          </div>
+          <span class="badge badge-${r.status}">${STATUS_LABELS[r.status] || r.status}</span>
+        </div>
+        <div class="lookup-meta-grid">
+          <div class="lookup-meta-item"><span class="label">구매처</span><span class="value">${escapeHtml(channelLabel(r.purchase_channel))}</span></div>
+          <div class="lookup-meta-item"><span class="label">구매일</span><span class="value">${escapeHtml(r.purchase_date || '-')}</span></div>
+          <div class="lookup-meta-item"><span class="label">발송 방법</span><span class="value">${escapeHtml(shippingMethodLabel(r.shipping_method))}</span></div>
+          <div class="lookup-meta-item"><span class="label">첨부</span><span class="value">📷 ${imgs} / 🎥 ${vids}</span></div>
+        </div>
+        <div class="lookup-section-title">📍 진행 상태 이력</div>
+        ${statusLogs.length ? `<div class="timeline">${statusLogs.map(l => `<div class="timeline-item">${formatDate(l.at, true)} · ${l.from ? (STATUS_LABELS[l.from] || l.from) + ' → ' : ''}${STATUS_LABELS[l.to] || l.to} (${escapeHtml(l.by || '')})</div>`).join('')}</div>` : '<div class="chat-empty">상태 이력이 없습니다.</div>'}
+        <div class="lookup-section-title">💬 관리자와의 대화</div>
+        ${buildChatThreadHtml(chatLogs)}
+        <div class="chat-compose">
+          <textarea placeholder="관리자에게 남길 내용을 입력해주세요" data-lookup-chat-input="${r.id}"></textarea>
+          <button type="button" class="btn btn-primary" data-lookup-chat-send="${r.id}">전송</button>
+        </div>
+      </article>`;
+  }).join('');
+  results.querySelectorAll('[data-lookup-chat-send]').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.lookupChatSend;
+      const ta = results.querySelector(`[data-lookup-chat-input="${id}"]`);
+      const msg = (ta?.value || '').trim();
+      if (!msg) { showToast('대화 내용을 입력해주세요', 'error'); return; }
+      btn.disabled = true;
+      btn.textContent = '전송 중...';
+      try {
+        await appendChatMessage(id, 'customer', msg);
+        if (ta) ta.value = '';
+        await loadLookupResults({ silent:true });
+        showToast('메시지가 등록되었습니다', 'success');
+      } catch (err) {
+        showToast('전송 실패: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '전송';
+      }
+    };
+  });
+}
+async function loadLookupResults({ silent } = {}) {
+  if (!lookupState.active) return;
+  const summary = document.getElementById('lookupSummaryText');
+  const pill = document.getElementById('lookupRealtimePill');
+  try {
+    const all = (await dbGetAll()).map(normalizeReceipt);
+    const matched = all.filter(r =>
+      (r.customer_name || '') === lookupState.name &&
+      (r.phone || '') === lookupState.phone &&
+      getReceiptPasswordHash(r) === lookupState.passwordHash
+    ).sort((a,b) => (b.created_at || '').localeCompare(a.created_at || ''));
+
+    if (!matched.length) {
+      if (summary) summary.textContent = '일치하는 신청 내역이 없습니다. 입력 정보를 확인해주세요.';
+      if (pill) pill.classList.add('hidden');
+      if (!silent) showToast('일치하는 신청 내역이 없습니다', 'error');
+      renderLookupResults([]);
+      return;
+    }
+    if (summary) summary.textContent = `총 ${matched.length}건 · 상태와 대화 내용이 자동으로 새로고침됩니다.`;
+    if (pill) pill.classList.remove('hidden');
+    renderLookupResults(matched);
+  } catch (err) {
+    if (summary) summary.textContent = '조회 중 오류: ' + err.message;
+    if (pill) pill.classList.add('hidden');
+  }
+}
+async function startLookup() {
+  const name = document.getElementById('lookupName').value.trim();
+  const phone = document.getElementById('lookupPhone').value.trim();
+  const password = document.getElementById('lookupPassword').value;
+  if (!name || !/^010-\d{4}-\d{4}$/.test(phone) || !password) {
+    showToast('이름·연락처·비밀번호를 정확히 입력해주세요', 'error');
+    return;
+  }
+  const btn = document.getElementById('lookupSearchBtn');
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.innerHTML = '<span class="spinner"></span> 조회 중...';
+  try {
+    lookupState.active = true;
+    lookupState.name = name;
+    lookupState.phone = phone;
+    lookupState.password = password;
+    lookupState.passwordHash = await hashPassword(password);
+    await loadLookupResults({ silent:false });
+    stopLookupPolling();
+    lookupState.timer = setInterval(() => {
+      if (document.hidden) return;
+      loadLookupResults({ silent:true }).catch(() => {});
+    }, 4000);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
+}
+document.getElementById('lookupSearchBtn').addEventListener('click', startLookup);
+document.getElementById('lookupResetBtn').addEventListener('click', () => resetLookupView(true));
+['lookupName','lookupPhone','lookupPassword'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('keypress', e => { if (e.key === 'Enter') startLookup(); });
+});
+document.getElementById('reviewNextBtn').addEventListener('click', focusNextReviewCard);
+renderStepIndicator();
+updateShippingMethodInfo();
 
 function showPrivacyModal() {
   const overlay = document.createElement('div');
@@ -1055,31 +1865,10 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   document.querySelectorAll('.field').forEach(f => f.classList.remove('error'));
 
-  const data = {
-    customer_name: document.getElementById('customer_name').value.trim(),
-    phone: document.getElementById('phone').value.trim(),
-    purchase_channel: state.channel,
-    product_name: document.getElementById('product_name').value.trim(),
-    purchase_date: document.getElementById('purchase_date').value,
-    issue_detail: document.getElementById('issue_detail').value.trim(),
-    privacy_agreed: document.getElementById('privacy_agreed').checked,
-  };
+  const data = getFormData();
 
-  let valid = true;
-  if (data.customer_name.length < 2) { document.querySelector('[data-field="customer_name"]').classList.add('error'); valid=false; }
-  if (!/^010-\d{4}-\d{4}$/.test(data.phone)) { document.querySelector('[data-field="phone"]').classList.add('error'); valid=false; }
-  if (!data.purchase_channel) { document.querySelector('[data-field="purchase_channel"]').classList.add('error'); valid=false; }
-  if (!data.product_name) { document.querySelector('[data-field="product_name"]').classList.add('error'); valid=false; }
-  if (!data.purchase_date) { document.querySelector('[data-field="purchase_date"]').classList.add('error'); valid=false; }
-  if (data.issue_detail.length < 10) { document.querySelector('[data-field="issue_detail"]').classList.add('error'); valid=false; }
-  if (!data.privacy_agreed) { document.querySelector('[data-field="privacy_agreed"]').classList.add('error'); valid=false; }
-
-  if (!valid) {
-    showToast('빨간색 표시된 항목을 확인해주세요', 'error');
-    const fe = document.querySelector('.field.error');
-    if (fe) fe.scrollIntoView({ behavior:'smooth', block:'center' });
-    return;
-  }
+  if (!validateStep(0)) { showFormStep(0); return; }
+  if (!validateStep(3)) { showFormStep(3); return; }
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
@@ -1096,7 +1885,21 @@ form.addEventListener('submit', async (e) => {
         imageUrls.push(url);
       } catch(e) { console.warn('image upload skipped', e); }
     }
+    const videoUrls = [];
+    if (state.videos.length) btn.innerHTML = '<span class="spinner"></span> 영상 업로드 중...';
+    for (let i=0; i<state.videos.length; i++) {
+      try {
+        const ext = getFileExt(state.videos[i].name) || 'mp4';
+        const url = await uploadFileToStorage('as-images', `${receipt_no}_video_${i}.${ext}`, state.videos[i].file);
+        videoUrls.push(url);
+      } catch(e) { console.warn('video upload skipped', e); }
+    }
     btn.innerHTML = '<span class="spinner"></span> 접수 중...';
+    const passwordHash = await hashPassword(data.receipt_password);
+    const attachments = [
+      ...imageUrls.map(url => ({ type:'image', url })),
+      ...videoUrls.map(url => ({ type:'video', url }))
+    ];
     const record = {
       id: uuid(), receipt_no,
       created_at: new Date().toISOString(),
@@ -1107,26 +1910,30 @@ form.addEventListener('submit', async (e) => {
       product_name: data.product_name,
       purchase_date: data.purchase_date,
       issue_detail: data.issue_detail,
-      image_urls: imageUrls,
-      status: 'received',
+      shipping_method: data.shipping_method,
+      image_urls: attachments,
+      status: 'as_received',
       admin_memo: '',
       privacy_agreed: data.privacy_agreed,
-      status_logs: [{ at:new Date().toISOString(), from:null, to:'received', by:'고객접수' }]
+      status_logs: [{ at:new Date().toISOString(), from:null, to:'as_received', by:'고객접수', receipt_password_hash: passwordHash }]
     };
     await dbAdd(record);
     document.getElementById('completeReceiptNo').textContent = receipt_no;
     showPage('complete');
     form.reset();
     state.channel = '';
-    state.images = [];
+    resetMediaState();
     document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
     renderPreview();
+    renderVideoPreview();
     document.getElementById('issueCount').textContent = '0';
+    updateShippingMethodInfo();
+    showFormStep(0);
   } catch(err) {
     showToast('접수 중 오류: '+err.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = 'A/S 접수하기';
+    btn.innerHTML = '신청완료';
   }
 });
 
@@ -1239,33 +2046,64 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
 });
 
 let allReceipts = [];
+let adminDashboardTimer = null;
 async function loadDashboard() {
-  allReceipts = await dbGetAll();
+  allReceipts = (await dbGetAll()).map(normalizeReceipt);
   allReceipts.sort((a,b) => b.created_at.localeCompare(a.created_at));
   updateStats();
+  applyQuickFilterUI();
   renderTable();
+  if (!adminDashboardTimer) {
+    adminDashboardTimer = setInterval(async () => {
+      if (document.hidden) return;
+      if (document.getElementById('adminDashboard').classList.contains('hidden')) return;
+      try {
+        allReceipts = (await dbGetAll()).map(normalizeReceipt);
+        allReceipts.sort((a,b) => b.created_at.localeCompare(a.created_at));
+        updateStats();
+        renderTable();
+      } catch(_) {}
+    }, 6000);
+  }
 }
 function updateStats() {
   const today = todayStr();
   document.getElementById('statToday').textContent = allReceipts.filter(r=>r.created_at.startsWith(today)).length;
-  document.getElementById('statChecking').textContent = allReceipts.filter(r=>r.status==='checking').length;
-  document.getElementById('statProcessing').textContent = allReceipts.filter(r=>r.status==='processing').length;
-  document.getElementById('statCompleted').textContent = allReceipts.filter(r=>r.status==='completed').length;
+  document.getElementById('statChecking').textContent = allReceipts.filter(r=>r.status==='as_received_done').length;
+  document.getElementById('statPickup').textContent = allReceipts.filter(r=>['pickup_in_progress','warehouse_received'].includes(r.status)).length;
+  document.getElementById('statProcessing').textContent = allReceipts.filter(r=>r.status==='as_processing').length;
+  document.getElementById('statCompleted').textContent = allReceipts.filter(r=>r.status==='shipment_sent').length;
   document.getElementById('statTotal').textContent = allReceipts.length;
 }
+
+let activeQuickFilter = 'all';
+function applyQuickFilterUI() {
+  document.querySelectorAll('.stat-card[data-quick-filter]').forEach(c => {
+    c.classList.toggle('active', c.dataset.quickFilter === activeQuickFilter);
+  });
+}
+function setQuickFilter(key) {
+  activeQuickFilter = key || 'all';
+  applyQuickFilterUI();
+  renderTable();
+}
+document.querySelectorAll('.stat-card[data-quick-filter]').forEach(card => {
+  card.addEventListener('click', () => setQuickFilter(card.dataset.quickFilter));
+});
 
 ['filterStart','filterEnd','filterChannel','filterStatus','filterSearch'].forEach(id => {
   document.getElementById(id).addEventListener('input', renderTable);
 });
 document.getElementById('resetFilterBtn').addEventListener('click', () => {
   ['filterStart','filterEnd','filterChannel','filterStatus','filterSearch'].forEach(id => document.getElementById(id).value='');
-  renderTable();
+  setQuickFilter('all');
 });
 
 function getFiltered() {
   const s=document.getElementById('filterStart').value, e=document.getElementById('filterEnd').value;
   const c=document.getElementById('filterChannel').value, st=document.getElementById('filterStatus').value;
   const q=document.getElementById('filterSearch').value.trim().toLowerCase();
+  const today = todayStr();
   return allReceipts.filter(r => {
     const d=r.created_at.slice(0,10);
     if (s && d<s) return false;
@@ -1273,6 +2111,11 @@ function getFiltered() {
     if (c && r.purchase_channel!==c) return false;
     if (st && r.status!==st) return false;
     if (q && !`${r.customer_name} ${r.phone} ${r.receipt_no}`.toLowerCase().includes(q)) return false;
+    if (activeQuickFilter && activeQuickFilter !== 'all') {
+      if (activeQuickFilter === 'today') { if (!r.created_at.startsWith(today)) return false; }
+      else if (activeQuickFilter === 'pickup_group') { if (!['pickup_in_progress','warehouse_received'].includes(r.status)) return false; }
+      else { if (r.status !== activeQuickFilter) return false; }
+    }
     return true;
   });
 }
@@ -1293,7 +2136,7 @@ function renderTable() {
       <td>${escapeHtml(channelLabel(r.purchase_channel))}</td>
       <td>${escapeHtml(r.product_name)}</td>
       <td>${r.purchase_date}</td>
-      <td>${r.image_urls?.length?`📷 ${r.image_urls.length}`:'-'}</td>
+      <td>${(() => { const imgs = getImageUrls(r); const vids = getVideoUrls(r); const parts = []; if (imgs.length) parts.push(`📷 ${imgs.length}`); if (vids.length) parts.push(`🎥 ${vids.length}`); return parts.length ? parts.join(' / ') : '-'; })()}</td>
       <td><span class="badge badge-${r.status}">${STATUS_LABELS[r.status]}</span></td>
       <td><button class="btn btn-primary btn-sm">상세</button></td>
     </tr>`).join('');
@@ -1301,10 +2144,12 @@ function renderTable() {
 }
 
 async function openDetail(id) {
-  const r = await dbGet(id);
+  const r = normalizeReceipt(await dbGet(id));
   if (!r) return;
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
+  const imageList = getImageUrls(r);
+  const videoList = getVideoUrls(r);
   overlay.innerHTML = `
     <div class="modal detail-modal">
       <h3>📋 ${r.receipt_no}</h3>
@@ -1314,16 +2159,26 @@ async function openDetail(id) {
       <div class="detail-row"><div class="label">구매처</div><div class="value">${escapeHtml(channelLabel(r.purchase_channel))}</div></div>
       <div class="detail-row"><div class="label">제품명</div><div class="value">${escapeHtml(r.product_name)}</div></div>
       <div class="detail-row"><div class="label">구매일</div><div class="value">${r.purchase_date}</div></div>
+      <div class="detail-row"><div class="label">발송 방법</div><div class="value">${escapeHtml(shippingMethodLabel(r.shipping_method))}</div></div>
       <div class="detail-row" style="flex-direction:column;align-items:flex-start;"><div class="label">접수 내용</div><div class="value" style="white-space:pre-wrap;margin-top:6px;">${escapeHtml(r.issue_detail)}</div></div>
-      ${r.image_urls?.length?`<div class="detail-row" style="flex-direction:column;align-items:flex-start;"><div class="label">첨부 사진 (${r.image_urls.length}장)</div><div class="detail-images">${r.image_urls.map(s=>`<img src="${s}" class="detail-img" />`).join('')}</div></div>`:''}
+      ${imageList.length?`<div class="detail-row" style="flex-direction:column;align-items:flex-start;"><div class="label">첨부 사진 (${imageList.length}장)</div><div class="detail-images">${imageList.map(s=>`<img src="${s}" class="detail-img" />`).join('')}</div></div>`:''}
+      ${videoList.length?`<div class="detail-row" style="flex-direction:column;align-items:flex-start;"><div class="label">첨부 영상 (${videoList.length}개)</div><div class="detail-videos">${videoList.map(s=>`<video src="${s}" controls playsinline preload="metadata"></video>`).join('')}</div></div>`:''}
       <div style="margin-top:20px;"><label style="font-weight:600;font-size:13px;">상태 변경</label>
         <select class="status-select" id="statusSelect">
           ${Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${r.status===k?'selected':''}>${v}</option>`).join('')}
         </select></div>
       <div style="margin-top:16px;"><label style="font-weight:600;font-size:13px;">관리자 메모 (내부용)</label>
         <textarea class="memo-area" id="memoArea">${escapeHtml(r.admin_memo||'')}</textarea></div>
-      ${r.status_logs?.length?`<div style="margin-top:16px;"><label style="font-weight:600;font-size:13px;">상태 변경 이력</label>
-        <div class="timeline">${r.status_logs.map(l=>`<div class="timeline-item">${formatDate(l.at,true)} · ${l.from?STATUS_LABELS[l.from]+' → ':''}${STATUS_LABELS[l.to]} (${l.by})</div>`).join('')}</div></div>`:''}
+      ${(() => { const statusLogs = getStatusChangeLogs(r); return statusLogs.length ? `<div style="margin-top:16px;"><label style="font-weight:600;font-size:13px;">상태 변경 이력</label>
+        <div class="timeline">${statusLogs.map(l=>`<div class="timeline-item">${formatDate(l.at,true)} · ${l.from?(STATUS_LABELS[l.from]||l.from)+' → ':''}${STATUS_LABELS[l.to]||l.to} (${escapeHtml(l.by||'')})</div>`).join('')}</div></div>` : ''; })()}
+      <div style="margin-top:18px;" id="adminChatWrap">
+        <label style="font-weight:600;font-size:13px;">💬 고객과의 대화</label>
+        <div id="adminChatThread" style="margin-top:8px;">${buildChatThreadHtml(getChatLogs(r))}</div>
+        <div class="chat-compose">
+          <textarea id="adminChatInput" placeholder="고객에게 보낼 메시지를 입력해주세요"></textarea>
+          <button type="button" class="btn btn-primary" id="adminChatSendBtn">전송</button>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;margin-top:20px;">
         <button class="btn btn-primary" style="flex:1;" id="saveDetailBtn">💾 저장</button>
         <button class="btn btn-danger" id="deleteDetailBtn">🗑️ 삭제</button>
@@ -1332,6 +2187,36 @@ async function openDetail(id) {
     </div>`;
   document.body.appendChild(overlay);
   overlay.querySelectorAll('.detail-img').forEach(img => img.onclick = () => showLightbox(img.src));
+  /* 관리자 채팅 전송 + 자동 폴링 */
+  let adminChatTimer = null;
+  const refreshAdminChat = async () => {
+    try {
+      const fresh = normalizeReceipt(await dbGet(r.id));
+      if (!fresh) return;
+      const wrap = overlay.querySelector('#adminChatThread');
+      if (wrap) wrap.innerHTML = buildChatThreadHtml(getChatLogs(fresh));
+    } catch(_) {}
+  };
+  adminChatTimer = setInterval(() => { if (!document.hidden) refreshAdminChat(); }, 4000);
+  const adminSendBtn = overlay.querySelector('#adminChatSendBtn');
+  if (adminSendBtn) adminSendBtn.onclick = async () => {
+    const ta = overlay.querySelector('#adminChatInput');
+    const msg = (ta?.value || '').trim();
+    if (!msg) { showToast('보낼 메시지를 입력해주세요', 'error'); return; }
+    adminSendBtn.disabled = true;
+    adminSendBtn.textContent = '전송 중...';
+    try {
+      await appendChatMessage(r.id, 'admin', msg);
+      if (ta) ta.value = '';
+      await refreshAdminChat();
+      showToast('메시지를 전송했습니다', 'success');
+    } catch(err) {
+      showToast('전송 실패: ' + err.message, 'error');
+    } finally {
+      adminSendBtn.disabled = false;
+      adminSendBtn.textContent = '전송';
+    }
+  };
   overlay.querySelector('#saveDetailBtn').onclick = async () => {
     const ns = overlay.querySelector('#statusSelect').value;
     const nm = overlay.querySelector('#memoArea').value;
@@ -1340,6 +2225,7 @@ async function openDetail(id) {
     u.status = ns; u.admin_memo = nm; u.updated_at = new Date().toISOString();
     await dbUpdate(u);
     showToast('저장 완료','success');
+    if (adminChatTimer) clearInterval(adminChatTimer);
     overlay.remove();
     await loadDashboard();
   };
@@ -1347,10 +2233,12 @@ async function openDetail(id) {
     if (!confirm(`${r.receipt_no} 삭제하시겠습니까?`)) return;
     await dbDelete(r.id);
     showToast('삭제 완료','success');
+    if (adminChatTimer) clearInterval(adminChatTimer);
     overlay.remove();
     await loadDashboard();
   };
-  overlay.querySelector('#closeDetailBtn').onclick = () => overlay.remove();
+  overlay.querySelector('#closeDetailBtn').onclick = () => { if (adminChatTimer) clearInterval(adminChatTimer); overlay.remove(); };
+  overlay.addEventListener('click', e => { if (e.target === overlay) { if (adminChatTimer) clearInterval(adminChatTimer); overlay.remove(); } });
 }
 
 /* Export */
@@ -1363,9 +2251,12 @@ function getExportRows() {
     '구매처': channelLabel(r.purchase_channel),
     '제품명': r.product_name,
     '구매일': r.purchase_date,
+    '발송방법': shippingMethodLabel(r.shipping_method),
     '접수내용': r.issue_detail,
-    '첨부사진수': r.image_urls?.length || 0,
-    '첨부사진URL': (r.image_urls||[]).join(' | '),
+    '첨부사진수': getImageUrls(r).length,
+    '첨부사진URL': getImageUrls(r).join(' | '),
+    '첨부영상수': getVideoUrls(r).length,
+    '첨부영상URL': getVideoUrls(r).join(' | '),
     '상태': STATUS_LABELS[r.status],
     '관리자메모': r.admin_memo || '',
     '최종수정': formatDate(r.updated_at, true)
@@ -1701,6 +2592,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_pkq7GfkAAAT9oavm-Gk86g_KZXOnHuL';</pre
   }
 })();
 </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
