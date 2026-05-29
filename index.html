@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<!--
+================================================================================
+  AirNOK A/S 접수 시스템 - Cloud 버전 (Supabase + Vercel)
+  
+  사용 전 필수 설정:
+  1. Supabase 가입 → 프로젝트 생성 → SQL Editor에서 가이드의 SQL 실행
+  2. 아래 코드의 SUPABASE_URL, SUPABASE_ANON_KEY를 본인 값으로 교체
+     (Ctrl+F 로 'SUPABASE_URL' 검색)
+  3. GitHub에 업로드 → Vercel 배포
+  
+  자세한 설정 가이드: "AirNOK 가입/배포 가이드" PDF 참조
+================================================================================
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#1B4332" id="metaThemeColor" />
+<title id="pageTitle">AirNOK A/S 접수 | 오투라이프캠핑</title>
+<link id="faviconLink" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏕️%3C/text%3E%3C/svg%3E" />
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --primary: #1B4332;
+    --primary-dark: #0F2A1F;
+    --primary-light: #2D6A4F;
+    --bg: #F8F9FA;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --error: #DC2626;
+    --success: #16A34A;
+    --warning: #EAB308;
+    --info: #2563EB;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
+  }
+  html, body { margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif; background:var(--bg); color:var(--text); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .hidden { display:none !important; }
+
+  header { background:var(--primary); color:white; padding:16px 20px; position:sticky; top:0; z-index:50; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  .header-inner { max-width:720px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; }
+  .logo-wrap { display:flex; align-items:center; gap:10px; }
+  .logo-img { height:32px; width:auto; max-width:200px; object-fit:contain; }
+  .logo { font-family:'Arial Black',sans-serif; font-weight:900; font-size:22px; letter-spacing:-0.5px; display:flex; align-items:baseline; gap:1px; }
+  .logo .air { font-style:italic; font-weight:700; opacity:0.95; }
+  .logo .nok { font-weight:900; }
+  .header-link { color:white; background:rgba(255,255,255,0.2); padding:8px 16px; border-radius:20px; text-decoration:none; font-size:13px; cursor:pointer; transition:background 0.2s; user-select:none; font-weight:600; border:1px solid rgba(255,255,255,0.3); }
+  .header-link:hover, .header-link:active { background:rgba(255,255,255,0.35); }
+
+  main { max-width:720px; margin:0 auto; padding:20px; padding-bottom:80px; }
+  .intro { text-align:center; padding:24px 16px; margin-bottom:16px; }
+  .intro h1 { font-size:24px; margin:0 0 8px; color:var(--primary-dark); letter-spacing:-0.5px; }
+  .intro p { color:var(--text-muted); font-size:14px; margin:0; }
+
+  .card { background:var(--card); border-radius:var(--radius); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
+  .field { margin-bottom:18px; }
+  .field label { display:block; font-size:14px; font-weight:600; margin-bottom:8px; color:var(--text); }
+  .field label .req { color:var(--error); margin-left:2px; }
+  .field label .opt { color:var(--text-muted); font-weight:400; font-size:12px; margin-left:4px; }
+  .field input[type="text"], .field input[type="tel"], .field input[type="date"], .field input[type="email"], .field input[type="password"], .field input[type="number"], .field textarea, .field select { width:100%; padding:14px; font-size:16px; border:1.5px solid var(--border); border-radius:10px; background:white; transition:border-color 0.2s, box-shadow 0.2s; font-family:inherit; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(27,67,50,0.1); }
+  .field textarea { min-height:120px; resize:vertical; }
+  .field .char-count { text-align:right; font-size:12px; color:var(--text-muted); margin-top:4px; }
+  .field .error-msg { display:none; color:var(--error); font-size:13px; margin-top:6px; font-weight:500; }
+  .field.error input, .field.error textarea, .field.error .channel-grid { border-color:var(--error); }
+  .field.error .error-msg { display:block; }
+
+  .channel-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .channel-btn { padding:16px 12px; border:1.5px solid var(--border); background:white; border-radius:10px; cursor:pointer; font-size:14px; font-weight:500; transition:all 0.15s; text-align:center; color:var(--text); }
+  .channel-btn:active { transform:scale(0.97); }
+  .channel-btn.active { background:var(--primary); color:white; border-color:var(--primary); font-weight:700; }
+
+  .upload-zone { border:2px dashed var(--border); border-radius:10px; padding:24px; text-align:center; cursor:pointer; transition:all 0.2s; background:#FAFAFA; }
+  .upload-zone:hover, .upload-zone.dragover { border-color:var(--primary); background:#F0F5F2; }
+  .upload-zone .icon { font-size:28px; margin-bottom:8px; }
+  .upload-zone p { margin:4px 0 0; font-size:13px; color:var(--text-muted); }
+  .upload-zone .upload-cta { color:var(--primary); font-weight:600; }
+  .preview-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:8px; margin-top:12px; }
+  .preview-item { position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+  .preview-item img { width:100%; height:100%; object-fit:cover; }
+  .preview-item .remove-btn { position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.7); color:white; border:none; cursor:pointer; font-size:14px; line-height:1; display:flex; align-items:center; justify-content:center; }
+
+  .checkbox-wrap { display:flex; align-items:flex-start; gap:10px; padding:12px; background:#F8F9FA; border-radius:8px; cursor:pointer; }
+  .checkbox-wrap input { width:20px; height:20px; margin-top:1px; accent-color:var(--primary); flex-shrink:0; }
+  .checkbox-wrap label { font-size:13px; cursor:pointer; line-height:1.4; margin:0; font-weight:400; }
+  .checkbox-wrap .view-terms { color:var(--primary); text-decoration:underline; cursor:pointer; margin-left:4px; }
+
+  .submit-btn { width:100%; padding:16px; background:var(--primary); color:white; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; transition:background 0.2s, transform 0.1s; margin-top:8px; }
+  .submit-btn:hover { background:var(--primary-dark); }
+  .submit-btn:active { transform:scale(0.99); }
+  .submit-btn:disabled { background:#999; cursor:not-allowed; }
+
+  .complete-screen { text-align:center; padding:40px 20px; }
+  .complete-icon { width:80px; height:80px; background:var(--success); border-radius:50%; margin:0 auto 24px; display:flex; align-items:center; justify-content:center; color:white; font-size:40px; }
+  .complete-screen h2 { font-size:24px; margin:0 0 12px; color:var(--primary-dark); }
+  .complete-screen p { color:var(--text-muted); margin:0 0 24px; }
+  .receipt-no-box { background:var(--primary); color:white; padding:20px; border-radius:12px; margin:24px 0; }
+  .receipt-no-box .label { font-size:13px; opacity:0.85; margin-bottom:6px; }
+  .receipt-no-box .number { font-size:22px; font-weight:700; letter-spacing:1px; font-family:'Courier New',monospace; }
+  .copy-btn { background:rgba(255,255,255,0.2); color:white; border:1px solid rgba(255,255,255,0.3); padding:8px 16px; border-radius:6px; cursor:pointer; font-size:13px; margin-top:12px; transition:background 0.2s; }
+  .copy-btn:hover { background:rgba(255,255,255,0.3); }
+  .info-box { background:#F0F5F2; border-left:4px solid var(--primary); padding:14px 16px; border-radius:8px; text-align:left; font-size:13px; color:var(--text); margin:20px 0; white-space:pre-wrap; }
+  .btn-secondary { display:inline-block; padding:12px 24px; background:white; color:var(--primary); border:1.5px solid var(--primary); border-radius:8px; text-decoration:none; font-weight:600; cursor:pointer; font-size:14px; }
+
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:100; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .modal { background:white; border-radius:16px; max-width:480px; width:100%; max-height:85vh; overflow-y:auto; padding:24px; box-shadow:var(--shadow-lg); }
+  .modal h3 { margin-top:0; color:var(--primary-dark); }
+  .modal-body { font-size:13px; color:var(--text); line-height:1.7; white-space:pre-wrap; }
+  .modal-close { width:100%; margin-top:20px; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
+
+  .admin-page { padding:16px; max-width:1400px; margin:0 auto; }
+  .admin-login { max-width:400px; margin:80px auto; padding:32px; background:white; border-radius:var(--radius); box-shadow:var(--shadow-lg); }
+  .admin-login h2 { text-align:center; margin-top:0; color:var(--primary-dark); }
+  .admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+  .admin-header h2 { margin:0; color:var(--primary-dark); font-size:20px; }
+  .admin-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .btn { padding:10px 16px; border-radius:8px; border:none; cursor:pointer; font-size:13px; font-weight:600; transition:all 0.15s; }
+  .btn-primary { background:var(--primary); color:white; }
+  .btn-primary:hover { background:var(--primary-dark); }
+  .btn-outline { background:white; color:var(--primary); border:1.5px solid var(--primary); }
+  .btn-danger { background:var(--error); color:white; }
+  .btn-sm { padding:6px 12px; font-size:12px; }
+
+  /* Tabs */
+  .admin-tabs { display:flex; gap:4px; margin-bottom:20px; background:white; padding:6px; border-radius:10px; box-shadow:var(--shadow); overflow-x:auto; }
+  .admin-tab { padding:10px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; color:var(--text-muted); border:none; background:transparent; white-space:nowrap; transition:all 0.15s; }
+  .admin-tab.active { background:var(--primary); color:white; }
+  .admin-tab:hover:not(.active) { background:#F3F4F6; color:var(--text); }
+
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
+  .stat-card { background:white; padding:16px; border-radius:var(--radius); box-shadow:var(--shadow); border-left:4px solid var(--primary); }
+  .stat-card .label { font-size:12px; color:var(--text-muted); margin-bottom:6px; }
+  .stat-card .value { font-size:24px; font-weight:700; color:var(--primary-dark); }
+
+  .filter-bar { background:white; padding:16px; border-radius:var(--radius); margin-bottom:16px; box-shadow:var(--shadow); }
+  .filter-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; }
+  .filter-row input, .filter-row select { padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:13px; background:white; }
+
+  .table-wrap { background:white; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:13px; min-width:900px; }
+  thead { background:#F8F9FA; }
+  th, td { padding:12px 10px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
+  th { font-weight:700; color:var(--text); font-size:12px; }
+  tbody tr { cursor:pointer; transition:background 0.1s; }
+  tbody tr:hover { background:#FAFAFA; }
+  .badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-received { background:#E5E7EB; color:#4B5563; }
+  .badge-checking { background:#FEF3C7; color:#92400E; }
+  .badge-processing { background:#DBEAFE; color:#1E40AF; }
+  .badge-completed { background:#D1FAE5; color:#065F46; }
+  .empty-state { padding:60px 20px; text-align:center; color:var(--text-muted); }
+
+  .detail-modal { max-width:600px; }
+  .detail-row { display:flex; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .detail-row .label { font-weight:600; min-width:100px; color:var(--text-muted); }
+  .detail-row .value { flex:1; }
+  .detail-images { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; margin-top:8px; }
+  .detail-images img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid var(--border); }
+  .status-select { padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; width:100%; margin-top:8px; }
+  .memo-area { width:100%; min-height:80px; padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; margin-top:8px; resize:vertical; }
+  .timeline { margin-top:16px; padding-left:16px; border-left:2px solid var(--border); }
+  .timeline-item { padding:8px 0; font-size:12px; color:var(--text-muted); position:relative; }
+  .timeline-item::before { content:""; position:absolute; left:-22px; top:12px; width:8px; height:8px; background:var(--primary); border-radius:50%; }
+
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:var(--text); color:white; padding:12px 24px; border-radius:30px; font-size:13px; font-weight:500; z-index:200; box-shadow:0 6px 20px rgba(0,0,0,0.3); animation:toastIn 0.25s ease-out; }
+  @keyframes toastIn { from{transform:translate(-50%,20px);opacity:0;} to{transform:translate(-50%,0);opacity:1;} }
+  .toast.success { background:var(--success); }
+  .toast.error { background:var(--error); }
+
+  .spinner { display:inline-block; width:18px; height:18px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.6s linear infinite; vertical-align:middle; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .lightbox { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:300; display:flex; align-items:center; justify-content:center; padding:20px; cursor:pointer; }
+  .lightbox img { max-width:100%; max-height:100%; }
+
+  footer { text-align:center; padding:20px; color:var(--text-muted); font-size:12px; background:white; border-top:1px solid var(--border); margin-top:40px; white-space:pre-wrap; }
+  footer a { color:var(--primary); text-decoration:none; cursor:pointer; }
+
+  /* === Content Editor Styles === */
+  .editor-section { background:white; border-radius:var(--radius); padding:24px; margin-bottom:16px; box-shadow:var(--shadow); }
+  .editor-section h3 { margin-top:0; color:var(--primary-dark); font-size:16px; padding-bottom:12px; border-bottom:2px solid #F3F4F6; display:flex; align-items:center; gap:8px; }
+  .editor-section h3 .section-icon { font-size:20px; }
+  .editor-section .desc { font-size:12px; color:var(--text-muted); margin:8px 0 16px; }
+  .editor-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:16px; }
+  .color-input-wrap { display:flex; gap:8px; align-items:center; }
+  .color-input-wrap input[type="color"] { width:50px; height:42px; padding:2px; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; }
+  .color-input-wrap input[type="text"] { flex:1; font-family:monospace; }
+  .channel-editor { display:flex; flex-direction:column; gap:8px; }
+  .channel-row { display:flex; gap:8px; align-items:center; }
+  .channel-row input { flex:1; padding:10px; border:1.5px solid var(--border); border-radius:8px; font-size:14px; }
+  .channel-row .delete-channel { background:var(--error); color:white; border:none; width:36px; height:36px; border-radius:6px; cursor:pointer; flex-shrink:0; }
+  .channel-row .move-handle { color:var(--text-muted); cursor:grab; padding:0 6px; user-select:none; }
+  .logo-preview { background:var(--primary); color:white; padding:16px; border-radius:10px; display:flex; align-items:center; justify-content:center; min-height:60px; margin-top:8px; }
+  .logo-preview img { max-height:40px; max-width:200px; }
+  .logo-mode-btns { display:flex; gap:8px; margin-bottom:8px; }
+  .logo-mode-btn { padding:8px 14px; border:1.5px solid var(--border); background:white; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; }
+  .logo-mode-btn.active { background:var(--primary); color:white; border-color:var(--primary); }
+  .reset-warning { background:#FEF2F2; border:1px solid #FCA5A5; border-radius:8px; padding:12px; margin-top:16px; font-size:13px; color:#991B1B; }
+  .save-bar { position:sticky; bottom:0; background:white; padding:14px; margin:-16px; margin-top:20px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; z-index:10; box-shadow:0 -4px 12px rgba(0,0,0,0.05); }
+  .icon-input { display:flex; gap:8px; align-items:center; }
+  .icon-input input { flex:1; font-size:20px; text-align:center; }
+  .preview-area { background:#F3F4F6; padding:16px; border-radius:10px; margin-top:16px; }
+  .preview-area .preview-label { font-size:11px; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px; }
+
+  @media (max-width:640px) {
+    .intro h1 { font-size:20px; }
+    .channel-grid { grid-template-columns:1fr 1fr; }
+    .admin-page { padding:12px; }
+    .stat-card .value { font-size:20px; }
+    th, td { padding:10px 8px; font-size:12px; }
+    .editor-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo-wrap" id="logoWrap">
+      <div class="logo" id="logoText"><span class="air">air</span><span class="nok">NOK</span></div>
+    </div>
+    <button type="button" class="header-link" id="adminEntryBtn">관리자 →</button>
+  </div>
+</header>
+
+<!-- 고객 페이지 -->
+<main id="customerPage">
+  <div class="intro">
+    <h1 id="introTitle">제품 A/S 접수</h1>
+    <p id="introDesc">오투라이프캠핑 · AirNOK 제품에 대한 A/S를<br/>온라인으로 간편하게 신청하세요.</p>
+  </div>
+
+  <form class="card" id="receiptForm" novalidate>
+    <div class="field" data-field="customer_name">
+      <label>이름 <span class="req">*</span></label>
+      <input type="text" id="customer_name" placeholder="홍길동" maxlength="20" autocomplete="name" />
+      <div class="error-msg">이름을 2자 이상 입력해주세요.</div>
+    </div>
+
+    <div class="field" data-field="phone">
+      <label>연락처 <span class="req">*</span></label>
+      <input type="tel" id="phone" placeholder="010-1234-5678" maxlength="13" autocomplete="tel" inputmode="numeric" />
+      <div class="error-msg">올바른 전화번호 형식이 아닙니다.</div>
+    </div>
+
+    <div class="field" data-field="purchase_channel">
+      <label>구매처 <span class="req">*</span></label>
+      <div class="channel-grid" id="channelGrid"></div>
+      <input type="hidden" id="purchase_channel" />
+      <div class="error-msg">구매처를 선택해주세요.</div>
+    </div>
+
+    <div class="field" data-field="product_name">
+      <label>제품명 / 모델명 <span class="req">*</span></label>
+      <input type="text" id="product_name" placeholder="예: 에어노크 텐트 X-Series" maxlength="100" />
+      <div class="error-msg">제품명을 입력해주세요.</div>
+    </div>
+
+    <div class="field" data-field="purchase_date">
+      <label>구매일 <span class="req">*</span></label>
+      <input type="date" id="purchase_date" />
+      <div class="error-msg">구매일을 선택해주세요.</div>
+    </div>
+
+    <div class="field" data-field="issue_detail">
+      <label>A/S 접수 내용 <span class="req">*</span></label>
+      <textarea id="issue_detail" placeholder="고장 증상이나 문제 상황을 상세히 작성해주세요." maxlength="1000"></textarea>
+      <div class="char-count"><span id="issueCount">0</span> / 1000</div>
+      <div class="error-msg">접수 내용을 10자 이상 작성해주세요.</div>
+    </div>
+
+    <div class="field">
+      <label id="uploadLabel">사진 첨부 <span class="opt">(선택 · 최대 5장, 각 5MB 이하)</span></label>
+      <div class="upload-zone" id="uploadZone">
+        <div class="icon" id="uploadIcon">📷</div>
+        <p><span class="upload-cta">사진 선택</span> 또는 끌어다 놓기</p>
+        <p style="font-size:11px;margin-top:4px;">JPG, PNG, HEIC · 자동 압축됨</p>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" multiple class="hidden" />
+      <div class="preview-grid" id="previewGrid"></div>
+    </div>
+
+    <div class="field" data-field="privacy_agreed">
+      <div class="checkbox-wrap" id="privacyCheckWrap">
+        <input type="checkbox" id="privacy_agreed" />
+        <label for="privacy_agreed">
+          개인정보 수집 및 이용에 동의합니다. <span class="req">*</span>
+          <span class="view-terms" id="viewTermsBtn">[전문 보기]</span>
+        </label>
+      </div>
+      <div class="error-msg">개인정보 수집·이용에 동의해주세요.</div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">A/S 접수하기</button>
+  </form>
+</main>
+
+<!-- 완료 페이지 -->
+<main id="completePage" class="hidden">
+  <div class="card complete-screen">
+    <div class="complete-icon" id="completeIcon">✓</div>
+    <h2 id="completeTitle">접수가 완료되었습니다</h2>
+    <p id="completeDesc">아래 접수번호로 처리 상태를 확인하실 수 있습니다.</p>
+    <div class="receipt-no-box">
+      <div class="label">접수번호</div>
+      <div class="number" id="completeReceiptNo">AS-00000000-0000</div>
+      <button class="copy-btn" id="copyReceiptBtn">📋 복사하기</button>
+    </div>
+    <div class="info-box" id="completeInfoBox"></div>
+    <button class="btn-secondary" id="newReceiptBtn">새로 접수하기</button>
+  </div>
+</main>
+
+<!-- 관리자 페이지 -->
+<div id="adminPage" class="hidden">
+  <div id="adminLoginScreen" class="admin-page">
+    <div class="admin-login">
+      <h2>🔐 관리자 로그인</h2>
+      <div class="field">
+        <label>비밀번호</label>
+        <input type="password" id="adminPassword" placeholder="비밀번호 입력" />
+        <div class="error-msg" id="loginError" style="display:none;">비밀번호가 일치하지 않습니다.</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:12px;" id="adminLoginBtn">로그인</button>
+      <p style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:16px;">
+        초기 비밀번호: <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;">airnok2026</code><br/>
+        <span style="color:var(--error);">로그인 후 반드시 변경하세요</span>
+      </p>
+      <p style="text-align:center;margin-top:16px;">
+        <a href="#" id="backToCustomer" style="color:var(--text-muted);font-size:13px;">← 고객 페이지로</a>
+      </p>
+      <details style="margin-top:20px;font-size:12px;color:var(--text-muted);">
+        <summary style="cursor:pointer;text-align:center;">도움말 / 문제 해결</summary>
+        <div style="padding:12px;background:#F9FAFB;border-radius:8px;margin-top:8px;">
+          • 새 메뉴는 로그인 후 상단 탭으로 구분됩니다.<br/>
+          • 비밀번호 분실 시 아래 "긴급 리셋"으로 초기화 가능.<br/>
+          • 다이렉트 진입: URL 끝에 <code>?admin=1</code> 추가<br/>
+          <button id="emergencyResetBtn" style="margin-top:8px;background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;">🔧 긴급 리셋 (비밀번호 재설정)</button>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div id="adminDashboard" class="admin-page hidden">
+    <div class="admin-header">
+      <h2>🏕️ <span id="adminTitle">AirNOK A/S 관리자</span></h2>
+      <div class="admin-actions">
+        <button class="btn btn-outline" id="changePwBtn">🔑 비밀번호 변경</button>
+        <button class="btn btn-outline" id="backupBtn">💾 백업/복원</button>
+        <button class="btn btn-danger" id="logoutBtn">로그아웃</button>
+      </div>
+    </div>
+
+    <!-- 탭 메뉴 -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="receipts">📋 접수 목록</button>
+      <button class="admin-tab" data-tab="content">⚙️ 콘텐츠 편집</button>
+      <button class="admin-tab" data-tab="branding">🎨 로고/브랜딩</button>
+      <button class="admin-tab" data-tab="theme">🌈 컬러 테마</button>
+      <button class="admin-tab" data-tab="policy">📜 약관/안내문</button>
+    </div>
+
+    <!-- 탭 1: 접수 목록 -->
+    <div class="tab-pane" id="tab-receipts">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="label">오늘 신규</div><div class="value" id="statToday">0</div></div>
+        <div class="stat-card" style="border-left-color:#EAB308;"><div class="label">확인중</div><div class="value" id="statChecking">0</div></div>
+        <div class="stat-card" style="border-left-color:#2563EB;"><div class="label">처리중</div><div class="value" id="statProcessing">0</div></div>
+        <div class="stat-card" style="border-left-color:#16A34A;"><div class="label">처리완료</div><div class="value" id="statCompleted">0</div></div>
+        <div class="stat-card" style="border-left-color:#6B7280;"><div class="label">전체</div><div class="value" id="statTotal">0</div></div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filter-row">
+          <input type="date" id="filterStart" />
+          <input type="date" id="filterEnd" />
+          <select id="filterChannel"><option value="">전체 구매처</option></select>
+          <select id="filterStatus">
+            <option value="">전체 상태</option>
+            <option value="received">접수완료</option>
+            <option value="checking">확인중</option>
+            <option value="processing">처리중</option>
+            <option value="completed">처리완료</option>
+          </select>
+          <input type="text" id="filterSearch" placeholder="이름/연락처/접수번호" />
+          <button class="btn btn-primary btn-sm" id="resetFilterBtn">초기화</button>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" id="exportXlsxBtn">📊 Excel 다운로드</button>
+          <button class="btn btn-outline btn-sm" id="exportCsvBtn">📄 CSV 다운로드</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>접수번호</th><th>접수일시</th><th>이름</th><th>연락처</th><th>구매처</th><th>제품명</th><th>구매일</th><th>사진</th><th>상태</th><th>액션</th>
+          </tr></thead>
+          <tbody id="receiptTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 탭 2: 콘텐츠 편집 -->
+    <div class="tab-pane hidden" id="tab-content">
+      <div class="editor-section">
+        <h3><span class="section-icon">📝</span> 페이지 텍스트</h3>
+        <p class="desc">고객이 보는 화면의 주요 문구를 수정합니다.</p>
+        <div class="editor-grid">
+          <div class="field">
+            <label>브라우저 탭 제목</label>
+            <input type="text" data-edit="content.pageTitle" />
+          </div>
+          <div class="field">
+            <label>관리자 페이지 제목</label>
+            <input type="text" data-edit="content.adminTitle" />
+          </div>
+          <div class="field">
+            <label>메인 페이지 큰 제목</label>
+            <input type="text" data-edit="content.introTitle" />
+          </div>
+          <div class="field">
+            <label>업로드 영역 라벨</label>
+            <input type="text" data-edit="content.uploadLabel" />
+          </div>
+        </div>
+        <div class="field" style="margin-top:8px;">
+          <label>메인 페이지 안내 문구 (줄바꿈 가능)</label>
+          <textarea data-edit="content.introDesc" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h3><span class="section-icon">🛒</span> 구매처 옵션 관리</h3>
+        <p class="desc">고객이 선택하는 구매처 버튼 목록을 자유롭게 추가/수정/삭제할 수 있습니다.</p>
+        <div class="channel-editor" id="channelEditor"></div>
+        <button class="btn btn-outline btn-sm" id="addChannelBtn" style="margin-top:12px;">+ 구매처 추가</button>
+      </div>
+
+      <div class="editor-section">
+        <h3><span class="section-icon">✅</span> 접수 완료 화면</h3>
+        <p class="desc">고객이 접수 완료 후 보는 화면의 문구를 수정합니다.</p>
+        <div class="editor-grid">
+          <div class="field">
+            <label>완료 아이콘 (이모지 1자)</label>
+            <div class="icon-input">
+              <input type="text" data-edit="content.completeIcon" maxlength="2" />
+            </div>
+          </div>
+          <div class="field">
+            <label>완료 제목</label>
+            <input type="text" data-edit="content.completeTitle" />
+          </div>
+        </div>
+        <div class="field">
+          <label>완료 설명 문구</label>
+          <input type="text" data-edit="content.completeDesc" />
+        </div>
+        <div class="field">
+          <label>완료 후 안내사항 (📌 안내사항 박스)</label>
+          <textarea data-edit="content.completeInfo" rows="5"></textarea>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h3><span class="section-icon">📞</span> 푸터 (페이지 하단)</h3>
+        <div class="field">
+          <label>푸터 내용 (줄바꿈 가능)</label>
+          <textarea data-edit="content.footerText" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <button class="btn btn-outline" data-reset="content">기본값으로 복원</button>
+        <button class="btn btn-primary" data-save="content">💾 저장 및 즉시 반영</button>
+      </div>
+    </div>
+
+    <!-- 탭 3: 로고/브랜딩 -->
+    <div class="tab-pane hidden" id="tab-branding">
+      <div class="editor-section">
+        <h3><span class="section-icon">🏔️</span> 헤더 로고</h3>
+        <p class="desc">페이지 상단에 표시되는 로고를 설정합니다. 텍스트 로고 또는 이미지 로고 중 선택할 수 있습니다.</p>
+
+        <div class="logo-mode-btns">
+          <button class="logo-mode-btn" data-logo-mode="text">📝 텍스트 로고</button>
+          <button class="logo-mode-btn" data-logo-mode="image">🖼️ 이미지 로고</button>
+        </div>
+
+        <div id="logoTextEditor">
+          <div class="editor-grid">
+            <div class="field">
+              <label>로고 앞부분 (예: air, 이탤릭)</label>
+              <input type="text" data-edit="branding.logoTextLeft" />
+            </div>
+            <div class="field">
+              <label>로고 뒷부분 (예: NOK, 굵게)</label>
+              <input type="text" data-edit="branding.logoTextRight" />
+            </div>
+          </div>
+        </div>
+
+        <div id="logoImageEditor" class="hidden">
+          <div class="upload-zone" id="logoUploadZone" style="margin-bottom:12px;">
+            <div class="icon">🖼️</div>
+            <p><span class="upload-cta">로고 이미지 업로드</span></p>
+            <p style="font-size:11px;margin-top:4px;">PNG, JPG, SVG · 권장 높이 80px 이상</p>
+          </div>
+          <input type="file" id="logoFileInput" accept="image/*" class="hidden" />
+          <button class="btn btn-outline btn-sm" id="clearLogoBtn">로고 이미지 제거</button>
+        </div>
+
+        <div class="preview-area">
+          <div class="preview-label">미리보기</div>
+          <div class="logo-preview" id="logoPreview"></div>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h3><span class="section-icon">🌐</span> 브라우저 파비콘/아이콘</h3>
+        <p class="desc">브라우저 탭에 표시되는 작은 아이콘입니다. 이모지 1자를 입력하면 자동으로 아이콘이 됩니다.</p>
+        <div class="editor-grid">
+          <div class="field">
+            <label>파비콘 (이모지 1자)</label>
+            <div class="icon-input">
+              <input type="text" data-edit="branding.faviconEmoji" maxlength="2" />
+            </div>
+          </div>
+          <div class="field">
+            <label>업로드 영역 아이콘 (이모지)</label>
+            <div class="icon-input">
+              <input type="text" data-edit="branding.uploadIcon" maxlength="2" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <button class="btn btn-outline" data-reset="branding">기본값으로 복원</button>
+        <button class="btn btn-primary" data-save="branding">💾 저장 및 즉시 반영</button>
+      </div>
+    </div>
+
+    <!-- 탭 4: 컬러 테마 -->
+    <div class="tab-pane hidden" id="tab-theme">
+      <div class="editor-section">
+        <h3><span class="section-icon">🎨</span> 메인 컬러</h3>
+        <p class="desc">사이트 전체에 적용되는 색상을 변경합니다. 좌측 색상 박스를 클릭하면 컬러피커가 열립니다.</p>
+        <div class="editor-grid">
+          <div class="field">
+            <label>메인 색상 (헤더, 버튼) — 기본: #1B4332</label>
+            <div class="color-input-wrap">
+              <input type="color" data-edit="theme.primary" />
+              <input type="text" data-edit-mirror="theme.primary" />
+            </div>
+          </div>
+          <div class="field">
+            <label>메인 어두운 색상 (호버) — 기본: #0F2A1F</label>
+            <div class="color-input-wrap">
+              <input type="color" data-edit="theme.primaryDark" />
+              <input type="text" data-edit-mirror="theme.primaryDark" />
+            </div>
+          </div>
+          <div class="field">
+            <label>성공 색상 (완료 아이콘) — 기본: #16A34A</label>
+            <div class="color-input-wrap">
+              <input type="color" data-edit="theme.success" />
+              <input type="text" data-edit-mirror="theme.success" />
+            </div>
+          </div>
+          <div class="field">
+            <label>오류 색상 (경고) — 기본: #DC2626</label>
+            <div class="color-input-wrap">
+              <input type="color" data-edit="theme.error" />
+              <input type="text" data-edit-mirror="theme.error" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h3><span class="section-icon">🎯</span> 프리셋 컬러 (한 번에 적용)</h3>
+        <p class="desc">아래 버튼을 클릭하면 미리 설정된 색상 조합이 즉시 적용됩니다.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-outline" data-preset="forest">🌲 포레스트 (다크그린)</button>
+          <button class="btn btn-outline" data-preset="ocean">🌊 오션 (네이비)</button>
+          <button class="btn btn-outline" data-preset="sunset">🌅 선셋 (오렌지)</button>
+          <button class="btn btn-outline" data-preset="mono">⚫ 모노 (블랙)</button>
+          <button class="btn btn-outline" data-preset="berry">🍇 베리 (퍼플)</button>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <button class="btn btn-outline" data-reset="theme">기본값으로 복원</button>
+        <button class="btn btn-primary" data-save="theme">💾 저장 및 즉시 반영</button>
+      </div>
+    </div>
+
+    <!-- 탭 5: 약관/안내문 -->
+    <div class="tab-pane hidden" id="tab-policy">
+      <div class="editor-section">
+        <h3><span class="section-icon">📜</span> 개인정보처리방침 (전문 보기 클릭 시 표시)</h3>
+        <p class="desc">고객이 [전문 보기]를 누르면 표시되는 약관 전문입니다.</p>
+        <div class="field">
+          <label>약관 제목</label>
+          <input type="text" data-edit="policy.title" />
+        </div>
+        <div class="field">
+          <label>약관 본문 (줄바꿈 자동 인식)</label>
+          <textarea data-edit="policy.body" rows="14" style="font-family:inherit;line-height:1.7;"></textarea>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <button class="btn btn-outline" data-reset="policy">기본값으로 복원</button>
+        <button class="btn btn-primary" data-save="policy">💾 저장 및 즉시 반영</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer id="pageFooter"></footer>
+
+<script>
+/* ================================================================== */
+/* AirNOK A/S 시스템 v2 - 풀 커스터마이즈 가능 단일 HTML                  */
+/* ================================================================== */
+
+/* ============================================================= */
+/* ☁️ Supabase 설정 — 가입 후 본인 값으로 교체하세요               */
+/* ============================================================= */
+const SUPABASE_URL = 'https://hezyqetaiqvarcmvxzat.supabase.co/rest/v1/';   // ← 본인 URL
+const SUPABASE_ANON_KEY = 'sb_publishable_pkq7GfkAAAT9oavm-Gk86g_KZXOnHuL';                 // ← 본인 anon key
+/* ============================================================= */
+
+const SB_HEADERS = {
+  'apikey': SUPABASE_ANON_KEY,
+  'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+/* Supabase REST API helpers */
+async function sbRequest(path, options={}) {
+  const url = `${https://hezyqetaiqvarcmvxzat.supabase.co/rest/v1/}/rest/v1${path}`;
+  const res = await fetch(url, {
+    ...options,
+    headers: { ...SB_HEADERS, ...(options.headers||{}) }
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Supabase ${res.status}: ${txt}`);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+/* 접수 CRUD */
+async function dbAdd(record) {
+  const result = await sbRequest('/as_receipts', {
+    method: 'POST',
+    body: JSON.stringify(record)
+  });
+  return Array.isArray(result) ? result[0] : result;
+}
+async function dbGetAll() {
+  return await sbRequest('/as_receipts?select=*&order=created_at.desc');
+}
+async function dbGet(id) {
+  const arr = await sbRequest(`/as_receipts?id=eq.${id}&select=*`);
+  return arr[0];
+}
+async function dbUpdate(record) {
+  const result = await sbRequest(`/as_receipts?id=eq.${record.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(record)
+  });
+  return Array.isArray(result) ? result[0] : result;
+}
+async function dbDelete(id) {
+  await sbRequest(`/as_receipts?id=eq.${id}`, { method: 'DELETE' });
+}
+
+/* 메타(설정/카운터/비밀번호) - app_settings 테이블에 통합 저장 */
+async function metaGet(key) {
+  try {
+    const arr = await sbRequest(`/app_settings?key=eq.${encodeURIComponent(key)}&select=value`);
+    return arr[0]?.value;
+  } catch(e) { console.warn('metaGet fail', key, e.message); return null; }
+}
+async function metaSet(key, value) {
+  // upsert
+  await sbRequest(`/app_settings?on_conflict=key`, {
+    method: 'POST',
+    headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ key, value, updated_at: new Date().toISOString() })
+  });
+}
+
+/* 이미지 업로드 -> Storage */
+async function uploadImageToStorage(bucket, fileName, dataUrl) {
+  // dataURL -> Blob
+  const res = await fetch(dataUrl);
+  const blob = await res.blob();
+  const path = `${Date.now()}_${fileName.replace(/[^a-z0-9._-]/gi,'_')}`;
+  const upRes = await fetch(`${https://hezyqetaiqvarcmvxzat.supabase.co/rest/v1/}/storage/v1/object/${bucket}/${path}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': blob.type || 'image/jpeg',
+      'x-upsert': 'true'
+    },
+    body: blob
+  });
+  if (!upRes.ok) throw new Error(`Upload failed: ${upRes.status}`);
+  return `${https://hezyqetaiqvarcmvxzat.supabase.co/rest/v1/}/storage/v1/object/public/${bucket}/${path}`;
+}
+
+/* 설정 키 확인 */
+function isSupabaseConfigured() {
+  return https://hezyqetaiqvarcmvxzat.supabase.co/rest/v1/L && !https://hezyqetaiqvarcmvxzat.supabase.co/rest/v1/includes('YOUR-PROJECT') && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes('sb_publishable_pkq7GfkAAAT9oavm-Gk86g_KZXOnHuL');
+}
+
+/* ============== 기본 설정값 (변경 가능) ============== */
+const DEFAULT_SETTINGS = {
+  content: {
+    pageTitle: 'AirNOK A/S 접수 | 오투라이프캠핑',
+    adminTitle: 'AirNOK A/S 관리자',
+    introTitle: '제품 A/S 접수',
+    introDesc: '오투라이프캠핑 · AirNOK 제품에 대한 A/S를\n온라인으로 간편하게 신청하세요.',
+    uploadLabel: '사진 첨부 (선택 · 최대 5장, 각 5MB 이하)',
+    completeIcon: '✓',
+    completeTitle: '접수가 완료되었습니다',
+    completeDesc: '아래 접수번호로 처리 상태를 확인하실 수 있습니다.',
+    completeInfo: '📌 안내사항\n· 영업일 기준 1~2일 내 담당자가 등록하신 연락처로 연락드립니다.\n· 접수번호는 안전한 곳에 보관해주세요.\n· 문의: 오투라이프캠핑 고객센터',
+    footerText: '© 2026 오투라이프캠핑 · AirNOK · 모든 권리 보유',
+    channels: [
+      { value:'o2life', label:'오투라이프캠핑' },
+      { value:'camping_store', label:'캠핑매장' },
+      { value:'offline_event', label:'오프라인 행사' },
+      { value:'etc', label:'기타' }
+    ]
+  },
+  branding: {
+    logoMode: 'text', // text or image
+    logoTextLeft: 'air',
+    logoTextRight: 'NOK',
+    logoImage: '', // dataURL
+    faviconEmoji: '🏕️',
+    uploadIcon: '📷'
+  },
+  theme: {
+    primary: '#1B4332',
+    primaryDark: '#0F2A1F',
+    success: '#16A34A',
+    error: '#DC2626'
+  },
+  policy: {
+    title: '개인정보 수집 및 이용 동의',
+    body: '1. 수집 항목\n이름, 연락처, 구매처, 제품명, 구매일, A/S 접수 내용, 첨부 사진\n\n2. 수집 목적\nA/S 접수 처리 및 고객 응대, 제품 품질 관리\n\n3. 보유 및 이용 기간\n접수일로부터 3년 보관 후 파기\n\n4. 동의 거부 권리\n고객은 동의를 거부할 권리가 있으며, 거부 시 A/S 접수가 불가합니다.\n\n5. 개인정보 보호 책임자\n오투라이프캠핑 고객센터'
+  }
+};
+
+const PRESETS = {
+  forest: { primary:'#1B4332', primaryDark:'#0F2A1F', success:'#16A34A', error:'#DC2626' },
+  ocean:  { primary:'#1E3A8A', primaryDark:'#1E2A6B', success:'#0891B2', error:'#DC2626' },
+  sunset: { primary:'#C2410C', primaryDark:'#9A3412', success:'#F59E0B', error:'#DC2626' },
+  mono:   { primary:'#1F2937', primaryDark:'#111827', success:'#16A34A', error:'#DC2626' },
+  berry:  { primary:'#7C3AED', primaryDark:'#5B21B6', success:'#16A34A', error:'#DC2626' }
+};
+
+let settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+async function loadSettings() {
+  const saved = await metaGet('app_settings');
+  if (saved) {
+    // 기본값 + 저장값 머지 (새 필드 추가 호환)
+    settings = {
+      content: { ...DEFAULT_SETTINGS.content, ...saved.content, channels: saved.content?.channels || DEFAULT_SETTINGS.content.channels },
+      branding: { ...DEFAULT_SETTINGS.branding, ...saved.branding },
+      theme: { ...DEFAULT_SETTINGS.theme, ...saved.theme },
+      policy: { ...DEFAULT_SETTINGS.policy, ...saved.policy }
+    };
+  }
+}
+
+async function saveSettings() {
+  await metaSet('app_settings', settings);
+}
+
+/* ============== 설정 적용 함수 ============== */
+function applySettings() {
+  try {
+  // 페이지 타이틀
+  document.getElementById('pageTitle').textContent = settings.content.pageTitle;
+  document.getElementById('adminTitle').textContent = settings.content.adminTitle;
+  document.getElementById('introTitle').textContent = settings.content.introTitle;
+  document.getElementById('introDesc').innerHTML = escapeHtml(settings.content.introDesc).replace(/\n/g, '<br/>');
+  document.getElementById('uploadLabel').innerHTML = settings.content.uploadLabel.replace(/\((.*?)\)/, '<span class="opt">($1)</span>');
+  document.getElementById('completeIcon').textContent = settings.content.completeIcon;
+  document.getElementById('completeTitle').textContent = settings.content.completeTitle;
+  document.getElementById('completeDesc').textContent = settings.content.completeDesc;
+  document.getElementById('completeInfoBox').textContent = settings.content.completeInfo;
+  document.getElementById('pageFooter').innerHTML = settings.content.footerText.replace(/\n/g,'<br/>') +
+    '<br/><a id="privacyFooterBtn">개인정보처리방침</a> · <a id="adminFooterBtn">관리자</a>';
+  document.getElementById('privacyFooterBtn').onclick = showPrivacyModal;
+  document.getElementById('adminFooterBtn').onclick = (e)=>{e.preventDefault();showPage('admin');};
+
+  // 로고
+  const logoWrap = document.getElementById('logoWrap');
+  if (settings.branding.logoMode === 'image' && settings.branding.logoImage) {
+    logoWrap.innerHTML = `<img class="logo-img" src="${settings.branding.logoImage}" alt="logo" />`;
+  } else {
+    logoWrap.innerHTML = `<div class="logo"><span class="air">${escapeHtml(settings.branding.logoTextLeft)}</span><span class="nok">${escapeHtml(settings.branding.logoTextRight)}</span></div>`;
+  }
+
+  // 파비콘
+  const emoji = settings.branding.faviconEmoji || '🏕️';
+  document.getElementById('faviconLink').href = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E${encodeURIComponent(emoji)}%3C/text%3E%3C/svg%3E`;
+
+  // 업로드 아이콘
+  document.getElementById('uploadIcon').textContent = settings.branding.uploadIcon || '📷';
+
+  // 컬러 테마
+  const root = document.documentElement;
+  root.style.setProperty('--primary', settings.theme.primary);
+  root.style.setProperty('--primary-dark', settings.theme.primaryDark);
+  root.style.setProperty('--success', settings.theme.success);
+  root.style.setProperty('--error', settings.theme.error);
+  document.getElementById('metaThemeColor').content = settings.theme.primary;
+
+  // 구매처 옵션
+  renderCustomerChannels();
+  renderFilterChannels();
+  } catch(err) { console.error('[applySettings] error', err); }
+  // 관리자 진입 버튼 재바인딩 (footer 재생성 후도 동작 보장)
+  if (typeof bindAdminEntry === 'function') bindAdminEntry();
+}
+
+function renderCustomerChannels() {
+  const grid = document.getElementById('channelGrid');
+  grid.innerHTML = settings.content.channels.map(c =>
+    `<button type="button" class="channel-btn" data-value="${escapeHtml(c.value)}">${escapeHtml(c.label)}</button>`
+  ).join('');
+  grid.querySelectorAll('.channel-btn').forEach(b => {
+    b.onclick = () => {
+      grid.querySelectorAll('.channel-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      state.channel = b.dataset.value;
+      document.getElementById('purchase_channel').value = state.channel;
+      document.querySelector('[data-field="purchase_channel"]').classList.remove('error');
+    };
+  });
+}
+
+function renderFilterChannels() {
+  const sel = document.getElementById('filterChannel');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">전체 구매처</option>' +
+    settings.content.channels.map(c => `<option value="${escapeHtml(c.value)}">${escapeHtml(c.label)}</option>`).join('');
+}
+
+function channelLabel(value) {
+  const c = settings.content.channels.find(x => x.value === value);
+  return c ? c.label : value;
+}
+
+/* ============== 유틸 ============== */
+const STATUS_LABELS = { received:'접수완료', checking:'확인중', processing:'처리중', completed:'처리완료' };
+function pad(n,len=2){return String(n).padStart(len,'0');}
+function formatDate(d,withTime=false){const dt=(d instanceof Date)?d:new Date(d);const s=`${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;return withTime?`${s} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`:s;}
+function todayStr(){return formatDate(new Date());}
+async function generateReceiptNo(){
+  const t=new Date();
+  const ymd=`${t.getFullYear()}${pad(t.getMonth()+1)}${pad(t.getDate())}`;
+  // Supabase에서 오늘 날짜 접수 개수를 세서 다음 번호 결정 (동시성 안전)
+  try {
+    const today = formatDate(t);
+    const tomorrow = new Date(t.getTime()+86400000); tomorrow.setHours(0,0,0,0);
+    const tStr = formatDate(tomorrow);
+    const res = await fetch(`${https://hezyqetaiqvarcmvxzat.supabase.co/rest/v1/}/rest/v1/as_receipts?select=receipt_no&created_at=gte.${today}T00:00:00&created_at=lt.${tStr}T00:00:00`, { headers: SB_HEADERS });
+    const list = await res.json();
+    let max = 0;
+    list.forEach(r => { const m = r.receipt_no?.match(/-(\d+)$/); if (m) max = Math.max(max, parseInt(m[1])); });
+    const next = max + 1 + Math.floor(Math.random()*3); // 서로 다른 사용자 충돌 회피
+    return `AS-${ymd}-${pad(next,4)}`;
+  } catch(e) {
+    console.warn('counter fallback', e);
+    return `AS-${ymd}-${pad(Date.now()%10000, 4)}`;
+  }
+}
+function uuid(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);});}
+function formatPhone(raw){const d=raw.replace(/\D/g,'').slice(0,11);if(d.length<4)return d;if(d.length<8)return`${d.slice(0,3)}-${d.slice(3)}`;return`${d.slice(0,3)}-${d.slice(3,7)}-${d.slice(7)}`;}
+function showToast(msg,type='info'){const old=document.querySelector('.toast');if(old)old.remove();const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2500);}
+function showLightbox(src){const b=document.createElement('div');b.className='lightbox';b.innerHTML=`<img src="${src}" />`;b.onclick=()=>b.remove();document.body.appendChild(b);}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function compressImage(file, maxWidth=1600, quality=0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = Math.round(h*(maxWidth/w)); w = maxWidth; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ============== 페이지 라우팅 ============== */
+const PAGES = { customer:document.getElementById('customerPage'), complete:document.getElementById('completePage'), admin:document.getElementById('adminPage') };
+function showPage(name){Object.values(PAGES).forEach(p=>p.classList.add('hidden'));PAGES[name].classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});}
+
+/* ============== 고객 페이지 ============== */
+const form = document.getElementById('receiptForm');
+const state = { channel:'', images:[] };
+
+const urlParams = new URLSearchParams(location.search);
+if (urlParams.get('product')) document.getElementById('product_name').value = urlParams.get('product');
+
+document.getElementById('phone').addEventListener('input', e => e.target.value = formatPhone(e.target.value));
+document.getElementById('issue_detail').addEventListener('input', e => document.getElementById('issueCount').textContent = e.target.value.length);
+
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const previewGrid = document.getElementById('previewGrid');
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+async function handleFiles(files) {
+  const remaining = 5 - state.images.length;
+  const toProcess = Array.from(files).slice(0, remaining);
+  if (files.length > remaining) showToast(`최대 5장까지 첨부 가능합니다`,'error');
+  for (const file of toProcess) {
+    if (!file.type.startsWith('image/')) { showToast('이미지 파일만 가능합니다','error'); continue; }
+    if (file.size > 5*1024*1024) { showToast('5MB 이하 이미지만 가능합니다','error'); continue; }
+    try {
+      const dataUrl = await compressImage(file);
+      state.images.push({ dataUrl, name:file.name });
+    } catch(err) { showToast('이미지 처리 실패: '+file.name,'error'); }
+  }
+  renderPreview();
+}
+
+function renderPreview() {
+  previewGrid.innerHTML = state.images.map((img,idx) =>
+    `<div class="preview-item"><img src="${img.dataUrl}" /><button type="button" class="remove-btn" data-idx="${idx}">×</button></div>`
+  ).join('');
+  previewGrid.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.onclick = () => { state.images.splice(parseInt(btn.dataset.idx),1); renderPreview(); };
+  });
+}
+
+document.getElementById('viewTermsBtn').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); showPrivacyModal(); });
+
+function showPrivacyModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>${escapeHtml(settings.policy.title)}</h3>
+      <div class="modal-body">${escapeHtml(settings.policy.body)}</div>
+      <button class="modal-close">확인</button>
+    </div>`;
+  overlay.querySelector('.modal-close').onclick = () => overlay.remove();
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  document.querySelectorAll('.field').forEach(f => f.classList.remove('error'));
+
+  const data = {
+    customer_name: document.getElementById('customer_name').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    purchase_channel: state.channel,
+    product_name: document.getElementById('product_name').value.trim(),
+    purchase_date: document.getElementById('purchase_date').value,
+    issue_detail: document.getElementById('issue_detail').value.trim(),
+    privacy_agreed: document.getElementById('privacy_agreed').checked,
+  };
+
+  let valid = true;
+  if (data.customer_name.length < 2) { document.querySelector('[data-field="customer_name"]').classList.add('error'); valid=false; }
+  if (!/^010-\d{4}-\d{4}$/.test(data.phone)) { document.querySelector('[data-field="phone"]').classList.add('error'); valid=false; }
+  if (!data.purchase_channel) { document.querySelector('[data-field="purchase_channel"]').classList.add('error'); valid=false; }
+  if (!data.product_name) { document.querySelector('[data-field="product_name"]').classList.add('error'); valid=false; }
+  if (!data.purchase_date) { document.querySelector('[data-field="purchase_date"]').classList.add('error'); valid=false; }
+  if (data.issue_detail.length < 10) { document.querySelector('[data-field="issue_detail"]').classList.add('error'); valid=false; }
+  if (!data.privacy_agreed) { document.querySelector('[data-field="privacy_agreed"]').classList.add('error'); valid=false; }
+
+  if (!valid) {
+    showToast('빨간색 표시된 항목을 확인해주세요', 'error');
+    const fe = document.querySelector('.field.error');
+    if (fe) fe.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 접수 중...';
+
+  try {
+    const receipt_no = await generateReceiptNo();
+    // 이미지를 Storage에 업로드 후 URL 수집
+    btn.innerHTML = '<span class="spinner"></span> 이미지 업로드 중...';
+    const imageUrls = [];
+    for (let i=0; i<state.images.length; i++) {
+      try {
+        const url = await uploadImageToStorage('as-images', `${receipt_no}_${i}.jpg`, state.images[i].dataUrl);
+        imageUrls.push(url);
+      } catch(e) { console.warn('image upload skipped', e); }
+    }
+    btn.innerHTML = '<span class="spinner"></span> 접수 중...';
+    const record = {
+      id: uuid(), receipt_no,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      customer_name: data.customer_name,
+      phone: data.phone,
+      purchase_channel: data.purchase_channel,
+      product_name: data.product_name,
+      purchase_date: data.purchase_date,
+      issue_detail: data.issue_detail,
+      image_urls: imageUrls,
+      status: 'received',
+      admin_memo: '',
+      privacy_agreed: data.privacy_agreed,
+      status_logs: [{ at:new Date().toISOString(), from:null, to:'received', by:'고객접수' }]
+    };
+    await dbAdd(record);
+    document.getElementById('completeReceiptNo').textContent = receipt_no;
+    showPage('complete');
+    form.reset();
+    state.channel = '';
+    state.images = [];
+    document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+    renderPreview();
+    document.getElementById('issueCount').textContent = '0';
+  } catch(err) {
+    showToast('접수 중 오류: '+err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'A/S 접수하기';
+  }
+});
+
+document.getElementById('copyReceiptBtn').addEventListener('click', () => {
+  const no = document.getElementById('completeReceiptNo').textContent;
+  navigator.clipboard.writeText(no).then(() => showToast('접수번호가 복사되었습니다','success'));
+});
+document.getElementById('newReceiptBtn').addEventListener('click', () => showPage('customer'));
+
+/* ============== 관리자 ============== */
+const ADMIN_PW_KEY = 'admin_password_hash';
+const DEFAULT_PW = 'airnok2026';
+
+/* 안전한 해시 함수 - crypto.subtle이 안 되는 환경도 지원 */
+function simpleHash(str) {
+  // FNV-1a 변형 해시 (secure context 아닌 곳에서도 동작)
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+  return ((h2>>>0).toString(16).padStart(8,'0') + (h1>>>0).toString(16).padStart(8,'0'));
+}
+async function hashPassword(pw) {
+  try {
+    if (window.crypto && window.crypto.subtle && window.isSecureContext) {
+      const enc = new TextEncoder();
+      const hash = await crypto.subtle.digest('SHA-256', enc.encode(pw));
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+  } catch(e) { console.warn('crypto.subtle 사용 불가, fallback 사용', e); }
+  return 'sh:' + simpleHash(pw);
+}
+async function getStoredPwHash() {
+  let h = await metaGet(ADMIN_PW_KEY);
+  if (!h) { h = await hashPassword(DEFAULT_PW); await metaSet(ADMIN_PW_KEY, h); }
+  return h;
+}
+
+function bindAdminEntry() {
+  const btn = document.getElementById('adminEntryBtn');
+  if (btn && !btn.dataset.bound) {
+    btn.addEventListener('click', () => { console.log('[Admin] entry clicked'); showPage('admin'); });
+    btn.dataset.bound = '1';
+  }
+}
+bindAdminEntry();
+document.getElementById('backToCustomer').addEventListener('click', e => { e.preventDefault(); showPage('customer'); });
+document.getElementById('adminLoginBtn').addEventListener('click', adminLogin);
+document.getElementById('adminPassword').addEventListener('keypress', e => { if (e.key === 'Enter') adminLogin(); });
+
+async function adminLogin() {
+  const pwInput = document.getElementById('adminPassword');
+  const pw = pwInput.value;
+  const errEl = document.getElementById('loginError');
+  if (!pw) { errEl.textContent='비밀번호를 입력해주세요.'; errEl.style.display='block'; return; }
+  try {
+    const inputHash = await hashPassword(pw);
+    const storedHash = await getStoredPwHash();
+    console.log('[Admin Login] hash check', { match: inputHash === storedHash });
+    if (inputHash === storedHash) {
+      document.getElementById('adminLoginScreen').classList.add('hidden');
+      document.getElementById('adminDashboard').classList.remove('hidden');
+      pwInput.value = '';
+      errEl.style.display = 'none';
+      await loadDashboard();
+      loadSettingsToEditors();
+    } else {
+      errEl.textContent='비밀번호가 일치하지 않습니다.';
+      errEl.style.display = 'block';
+    }
+  } catch(err) {
+    console.error('[Admin Login] error', err);
+    errEl.textContent='로그인 오류: '+err.message;
+    errEl.style.display='block';
+  }
+}
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  document.getElementById('adminLoginScreen').classList.remove('hidden');
+  document.getElementById('adminDashboard').classList.add('hidden');
+  showPage('customer');
+});
+
+document.getElementById('changePwBtn').addEventListener('click', () => {
+  const cur = prompt('현재 비밀번호:');
+  if (!cur) return;
+  hashPassword(cur).then(async h => {
+    if (h !== await getStoredPwHash()) { alert('비밀번호 불일치'); return; }
+    const np = prompt('새 비밀번호 (4자 이상):');
+    if (!np || np.length<4) { alert('4자 이상'); return; }
+    const np2 = prompt('새 비밀번호 확인:');
+    if (np !== np2) { alert('불일치'); return; }
+    await metaSet(ADMIN_PW_KEY, await hashPassword(np));
+    showToast('비밀번호 변경 완료','success');
+  });
+});
+
+/* 탭 전환 */
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+    document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
+  });
+});
+
+let allReceipts = [];
+async function loadDashboard() {
+  allReceipts = await dbGetAll();
+  allReceipts.sort((a,b) => b.created_at.localeCompare(a.created_at));
+  updateStats();
+  renderTable();
+}
+function updateStats() {
+  const today = todayStr();
+  document.getElementById('statToday').textContent = allReceipts.filter(r=>r.created_at.startsWith(today)).length;
+  document.getElementById('statChecking').textContent = allReceipts.filter(r=>r.status==='checking').length;
+  document.getElementById('statProcessing').textContent = allReceipts.filter(r=>r.status==='processing').length;
+  document.getElementById('statCompleted').textContent = allReceipts.filter(r=>r.status==='completed').length;
+  document.getElementById('statTotal').textContent = allReceipts.length;
+}
+
+['filterStart','filterEnd','filterChannel','filterStatus','filterSearch'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderTable);
+});
+document.getElementById('resetFilterBtn').addEventListener('click', () => {
+  ['filterStart','filterEnd','filterChannel','filterStatus','filterSearch'].forEach(id => document.getElementById(id).value='');
+  renderTable();
+});
+
+function getFiltered() {
+  const s=document.getElementById('filterStart').value, e=document.getElementById('filterEnd').value;
+  const c=document.getElementById('filterChannel').value, st=document.getElementById('filterStatus').value;
+  const q=document.getElementById('filterSearch').value.trim().toLowerCase();
+  return allReceipts.filter(r => {
+    const d=r.created_at.slice(0,10);
+    if (s && d<s) return false;
+    if (e && d>e) return false;
+    if (c && r.purchase_channel!==c) return false;
+    if (st && r.status!==st) return false;
+    if (q && !`${r.customer_name} ${r.phone} ${r.receipt_no}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  const tbody = document.getElementById('receiptTableBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">📭 조회된 접수가 없습니다.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(r => `
+    <tr data-id="${r.id}">
+      <td><strong>${r.receipt_no}</strong></td>
+      <td>${formatDate(r.created_at,true)}</td>
+      <td>${escapeHtml(r.customer_name)}</td>
+      <td>${escapeHtml(r.phone)}</td>
+      <td>${escapeHtml(channelLabel(r.purchase_channel))}</td>
+      <td>${escapeHtml(r.product_name)}</td>
+      <td>${r.purchase_date}</td>
+      <td>${r.image_urls?.length?`📷 ${r.image_urls.length}`:'-'}</td>
+      <td><span class="badge badge-${r.status}">${STATUS_LABELS[r.status]}</span></td>
+      <td><button class="btn btn-primary btn-sm">상세</button></td>
+    </tr>`).join('');
+  tbody.querySelectorAll('tr').forEach(tr => tr.onclick = () => openDetail(tr.dataset.id));
+}
+
+async function openDetail(id) {
+  const r = await dbGet(id);
+  if (!r) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal detail-modal">
+      <h3>📋 ${r.receipt_no}</h3>
+      <div class="detail-row"><div class="label">접수일시</div><div class="value">${formatDate(r.created_at,true)}</div></div>
+      <div class="detail-row"><div class="label">이름</div><div class="value">${escapeHtml(r.customer_name)}</div></div>
+      <div class="detail-row"><div class="label">연락처</div><div class="value"><a href="tel:${r.phone}" style="color:var(--primary);">${r.phone}</a></div></div>
+      <div class="detail-row"><div class="label">구매처</div><div class="value">${escapeHtml(channelLabel(r.purchase_channel))}</div></div>
+      <div class="detail-row"><div class="label">제품명</div><div class="value">${escapeHtml(r.product_name)}</div></div>
+      <div class="detail-row"><div class="label">구매일</div><div class="value">${r.purchase_date}</div></div>
+      <div class="detail-row" style="flex-direction:column;align-items:flex-start;"><div class="label">접수 내용</div><div class="value" style="white-space:pre-wrap;margin-top:6px;">${escapeHtml(r.issue_detail)}</div></div>
+      ${r.image_urls?.length?`<div class="detail-row" style="flex-direction:column;align-items:flex-start;"><div class="label">첨부 사진 (${r.image_urls.length}장)</div><div class="detail-images">${r.image_urls.map(s=>`<img src="${s}" class="detail-img" />`).join('')}</div></div>`:''}
+      <div style="margin-top:20px;"><label style="font-weight:600;font-size:13px;">상태 변경</label>
+        <select class="status-select" id="statusSelect">
+          ${Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${r.status===k?'selected':''}>${v}</option>`).join('')}
+        </select></div>
+      <div style="margin-top:16px;"><label style="font-weight:600;font-size:13px;">관리자 메모 (내부용)</label>
+        <textarea class="memo-area" id="memoArea">${escapeHtml(r.admin_memo||'')}</textarea></div>
+      ${r.status_logs?.length?`<div style="margin-top:16px;"><label style="font-weight:600;font-size:13px;">상태 변경 이력</label>
+        <div class="timeline">${r.status_logs.map(l=>`<div class="timeline-item">${formatDate(l.at,true)} · ${l.from?STATUS_LABELS[l.from]+' → ':''}${STATUS_LABELS[l.to]} (${l.by})</div>`).join('')}</div></div>`:''}
+      <div style="display:flex;gap:8px;margin-top:20px;">
+        <button class="btn btn-primary" style="flex:1;" id="saveDetailBtn">💾 저장</button>
+        <button class="btn btn-danger" id="deleteDetailBtn">🗑️ 삭제</button>
+        <button class="btn btn-outline" id="closeDetailBtn">닫기</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelectorAll('.detail-img').forEach(img => img.onclick = () => showLightbox(img.src));
+  overlay.querySelector('#saveDetailBtn').onclick = async () => {
+    const ns = overlay.querySelector('#statusSelect').value;
+    const nm = overlay.querySelector('#memoArea').value;
+    const u = { ...r };
+    if (ns !== r.status) u.status_logs = [...(r.status_logs||[]), { at:new Date().toISOString(), from:r.status, to:ns, by:'관리자' }];
+    u.status = ns; u.admin_memo = nm; u.updated_at = new Date().toISOString();
+    await dbUpdate(u);
+    showToast('저장 완료','success');
+    overlay.remove();
+    await loadDashboard();
+  };
+  overlay.querySelector('#deleteDetailBtn').onclick = async () => {
+    if (!confirm(`${r.receipt_no} 삭제하시겠습니까?`)) return;
+    await dbDelete(r.id);
+    showToast('삭제 완료','success');
+    overlay.remove();
+    await loadDashboard();
+  };
+  overlay.querySelector('#closeDetailBtn').onclick = () => overlay.remove();
+}
+
+/* Export */
+function getExportRows() {
+  return getFiltered().map(r => ({
+    '접수번호': r.receipt_no,
+    '접수일시': formatDate(r.created_at, true),
+    '이름': r.customer_name,
+    '연락처': r.phone,
+    '구매처': channelLabel(r.purchase_channel),
+    '제품명': r.product_name,
+    '구매일': r.purchase_date,
+    '접수내용': r.issue_detail,
+    '첨부사진수': r.image_urls?.length || 0,
+    '첨부사진URL': (r.image_urls||[]).join(' | '),
+    '상태': STATUS_LABELS[r.status],
+    '관리자메모': r.admin_memo || '',
+    '최종수정': formatDate(r.updated_at, true)
+  }));
+}
+
+document.getElementById('exportXlsxBtn').addEventListener('click', () => {
+  const rows = getExportRows();
+  if (rows.length === 0) { showToast('데이터가 없습니다','error'); return; }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = Object.keys(rows[0]).map(k => {
+    const m = Math.max(k.length*2, ...rows.map(r => String(r[k]||'').length));
+    return { wch: Math.min(m+2, 50) };
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'A/S 접수목록');
+  XLSX.writeFile(wb, `AirNOK_AS_${todayStr().replace(/-/g,'')}.xlsx`);
+  showToast(`${rows.length}건 다운로드`,'success');
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click', () => {
+  const rows = getExportRows();
+  if (rows.length === 0) { showToast('데이터가 없습니다','error'); return; }
+  const headers = Object.keys(rows[0]);
+  const csv = [headers.join(','), ...rows.map(r => headers.map(h => `"${String(r[h]??'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `AirNOK_AS_${todayStr().replace(/-/g,'')}.csv`;
+  a.click();
+  showToast(`${rows.length}건 다운로드`,'success');
+});
+
+/* 백업 */
+document.getElementById('backupBtn').addEventListener('click', () => {
+  const o = document.createElement('div');
+  o.className = 'modal-overlay';
+  o.innerHTML = `
+    <div class="modal">
+      <h3>💾 데이터 백업/복원</h3>
+      <div class="modal-body">백업: 모든 접수 데이터(사진+설정 포함)를 JSON으로 저장
+복원: 백업 파일을 불러와 기존 데이터에 덮어씁니다.
+정기적인 백업을 권장합니다.</div>
+      <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="doBackup">📤 백업 받기</button>
+        <button class="btn btn-outline" id="doRestore">📥 복원하기</button>
+        <button class="btn btn-danger" id="doClear">🗑️ 전체 삭제</button>
+      </div>
+      <input type="file" id="restoreFile" accept=".json" class="hidden" />
+      <button class="modal-close">닫기</button>
+    </div>`;
+  o.querySelector('.modal-close').onclick = () => o.remove();
+  o.querySelector('#doBackup').onclick = async () => {
+    const all = await dbGetAll();
+    const data = { receipts: all, settings: settings, exported_at: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `airnok_backup_${todayStr().replace(/-/g,'')}.json`;
+    a.click();
+    showToast('백업 완료','success');
+  };
+  o.querySelector('#doRestore').onclick = () => o.querySelector('#restoreFile').click();
+  o.querySelector('#restoreFile').onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!confirm('기존 데이터가 덮어쓰기됩니다. 진행할까요?')) return;
+    try {
+      const data = JSON.parse(await file.text());
+      const arr = Array.isArray(data) ? data : data.receipts;
+      // 기존 접수 전체 삭제
+      for (const r of allReceipts) { try { await dbDelete(r.id); } catch(_){} }
+      // 새로 삽입
+      for (const rec of arr) { try { await dbAdd(rec); } catch(_){} }
+      if (data.settings) { settings = data.settings; await saveSettings(); applySettings(); loadSettingsToEditors(); }
+      showToast(`${arr.length}건 복원 완료`,'success');
+      o.remove();
+      await loadDashboard();
+    } catch(err) { showToast('복원 실패: '+err.message,'error'); }
+  };
+  o.querySelector('#doClear').onclick = async () => {
+    if (prompt('"DELETE" 입력 시 전체 삭제') !== 'DELETE') return;
+    try {
+      for (const r of allReceipts) { try { await dbDelete(r.id); } catch(_){} }
+      showToast('전체 삭제 완료','success');
+      o.remove();
+      await loadDashboard();
+    } catch(err) { showToast('삭제 실패: '+err.message,'error'); }
+  };
+  document.body.appendChild(o);
+});
+
+/* ============== 콘텐츠 에디터 ============== */
+function getNested(obj, path) {
+  return path.split('.').reduce((o,k) => o?.[k], obj);
+}
+function setNested(obj, path, value) {
+  const keys = path.split('.');
+  const last = keys.pop();
+  const target = keys.reduce((o,k) => o[k] = o[k] || {}, obj);
+  target[last] = value;
+}
+
+function loadSettingsToEditors() {
+  // 모든 data-edit 입력 필드에 값 채우기
+  document.querySelectorAll('[data-edit]').forEach(el => {
+    const path = el.dataset.edit;
+    const val = getNested(settings, path);
+    if (val !== undefined) el.value = val;
+  });
+  document.querySelectorAll('[data-edit-mirror]').forEach(el => {
+    el.value = getNested(settings, el.dataset.editMirror);
+  });
+  renderChannelEditor();
+  updateLogoModeUI();
+  updateLogoPreview();
+}
+
+// 컬러 입력 동기화
+document.querySelectorAll('[data-edit]').forEach(el => {
+  el.addEventListener('input', () => {
+    const path = el.dataset.edit;
+    setNested(settings, path, el.value);
+    // 미러 동기화
+    const mirror = document.querySelector(`[data-edit-mirror="${path}"]`);
+    if (mirror) mirror.value = el.value;
+    if (path.startsWith('branding')) updateLogoPreview();
+  });
+});
+document.querySelectorAll('[data-edit-mirror]').forEach(el => {
+  el.addEventListener('input', () => {
+    const path = el.dataset.editMirror;
+    setNested(settings, path, el.value);
+    const main = document.querySelector(`[data-edit="${path}"]`);
+    if (main) main.value = el.value;
+  });
+});
+
+// 채널 에디터
+function renderChannelEditor() {
+  const container = document.getElementById('channelEditor');
+  container.innerHTML = settings.content.channels.map((c, idx) => `
+    <div class="channel-row" data-idx="${idx}">
+      <span class="move-handle">⋮⋮</span>
+      <input type="text" value="${escapeHtml(c.label)}" placeholder="표시 이름" data-channel-label="${idx}" />
+      <input type="text" value="${escapeHtml(c.value)}" placeholder="내부 코드 (영문)" data-channel-value="${idx}" style="max-width:140px;font-family:monospace;font-size:12px;" />
+      <button class="delete-channel" data-del-channel="${idx}">×</button>
+    </div>
+  `).join('');
+  container.querySelectorAll('[data-channel-label]').forEach(input => {
+    input.addEventListener('input', e => {
+      settings.content.channels[parseInt(input.dataset.channelLabel)].label = e.target.value;
+    });
+  });
+  container.querySelectorAll('[data-channel-value]').forEach(input => {
+    input.addEventListener('input', e => {
+      settings.content.channels[parseInt(input.dataset.channelValue)].value = e.target.value.replace(/[^a-z0-9_]/gi,'').toLowerCase();
+    });
+  });
+  container.querySelectorAll('[data-del-channel]').forEach(btn => {
+    btn.onclick = () => {
+      if (settings.content.channels.length <= 1) { showToast('최소 1개 이상 필요합니다','error'); return; }
+      settings.content.channels.splice(parseInt(btn.dataset.delChannel), 1);
+      renderChannelEditor();
+    };
+  });
+}
+document.getElementById('addChannelBtn').addEventListener('click', () => {
+  settings.content.channels.push({ value:'new_'+Date.now(), label:'새 구매처' });
+  renderChannelEditor();
+});
+
+// 로고 모드
+document.querySelectorAll('[data-logo-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    settings.branding.logoMode = btn.dataset.logoMode;
+    updateLogoModeUI();
+    updateLogoPreview();
+  });
+});
+function updateLogoModeUI() {
+  document.querySelectorAll('[data-logo-mode]').forEach(b => {
+    b.classList.toggle('active', b.dataset.logoMode === settings.branding.logoMode);
+  });
+  document.getElementById('logoTextEditor').classList.toggle('hidden', settings.branding.logoMode !== 'text');
+  document.getElementById('logoImageEditor').classList.toggle('hidden', settings.branding.logoMode !== 'image');
+}
+function updateLogoPreview() {
+  const preview = document.getElementById('logoPreview');
+  if (settings.branding.logoMode === 'image' && settings.branding.logoImage) {
+    preview.innerHTML = `<img src="${settings.branding.logoImage}" />`;
+  } else {
+    preview.innerHTML = `<div class="logo"><span class="air">${escapeHtml(settings.branding.logoTextLeft)}</span><span class="nok">${escapeHtml(settings.branding.logoTextRight)}</span></div>`;
+  }
+  preview.style.background = settings.theme.primary;
+}
+
+// 로고 이미지 업로드
+const logoUploadZone = document.getElementById('logoUploadZone');
+const logoFileInput = document.getElementById('logoFileInput');
+logoUploadZone.addEventListener('click', () => logoFileInput.click());
+logoUploadZone.addEventListener('dragover', e => { e.preventDefault(); logoUploadZone.classList.add('dragover'); });
+logoUploadZone.addEventListener('dragleave', () => logoUploadZone.classList.remove('dragover'));
+logoUploadZone.addEventListener('drop', e => { e.preventDefault(); logoUploadZone.classList.remove('dragover'); handleLogoFile(e.dataTransfer.files[0]); });
+logoFileInput.addEventListener('change', e => handleLogoFile(e.target.files[0]));
+
+async function handleLogoFile(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('이미지 파일만 가능','error'); return; }
+  if (file.size > 2*1024*1024) { showToast('2MB 이하만 가능','error'); return; }
+  showToast('로고 업로드 중...','info');
+  try {
+    // SVG는 그대로, 비트맵은 압축
+    let dataUrl;
+    if (file.type === 'image/svg+xml') {
+      dataUrl = await new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(file); });
+    } else {
+      dataUrl = await compressImage(file, 800, 0.92);
+    }
+    // Storage 버킷에 업로드해서 URL로 저장 (모든 사용자가 볼 수 있도록)
+    const publicUrl = await uploadImageToStorage('branding', `logo_${Date.now()}.png`, dataUrl);
+    settings.branding.logoImage = publicUrl;
+    updateLogoPreview();
+    showToast('✅ 로고 업로드 완료. 저장 버튼을 눌러주세요','success');
+  } catch(err) { console.error(err); showToast('업로드 실패: '+err.message,'error'); }
+}
+
+document.getElementById('clearLogoBtn').addEventListener('click', () => {
+  settings.branding.logoImage = '';
+  updateLogoPreview();
+  showToast('로고 이미지 제거됨','success');
+});
+
+// 프리셋 컬러
+document.querySelectorAll('[data-preset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = PRESETS[btn.dataset.preset];
+    if (!p) return;
+    settings.theme = { ...settings.theme, ...p };
+    loadSettingsToEditors();
+    showToast('프리셋 적용됨. 저장 버튼을 눌러주세요','success');
+  });
+});
+
+// 저장 버튼
+document.querySelectorAll('[data-save]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    await saveSettings();
+    applySettings();
+    showToast('✅ 저장 및 반영 완료','success');
+  });
+});
+
+// 초기화 버튼
+document.querySelectorAll('[data-reset]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const section = btn.dataset.reset;
+    if (!confirm(`"${section}" 영역을 기본값으로 복원하시겠습니까?`)) return;
+    settings[section] = JSON.parse(JSON.stringify(DEFAULT_SETTINGS[section]));
+    await saveSettings();
+    applySettings();
+    loadSettingsToEditors();
+    showToast('기본값으로 복원됨','success');
+  });
+});
+
+/* ============== 초기화 ============== */
+// 긴급 리셋 핸들러
+document.getElementById('emergencyResetBtn')?.addEventListener('click', async () => {
+  if (!confirm('비밀번호를 초기값(airnok2026)으로 재설정하시겠습니까?\n(접수 데이터는 유지됩니다)')) return;
+  try {
+    const newHash = await hashPassword(DEFAULT_PW);
+    await metaSet(ADMIN_PW_KEY, newHash);
+    alert('✅ 비밀번호가 "airnok2026"으로 초기화되었습니다.');
+  } catch(err) { alert('리셋 실패: '+err.message); }
+});
+
+(async function init() {
+  try {
+    console.log('[Init] start, secureContext=', window.isSecureContext);
+
+    // Supabase 설정 확인
+    if (!isSupabaseConfigured()) {
+      document.body.innerHTML = `<div style="max-width:600px;margin:60px auto;padding:32px;font-family:'Noto Sans KR',sans-serif;background:#FEF3C7;border-left:6px solid #F59E0B;border-radius:12px;">
+        <h2 style="color:#92400E;margin-top:0;">⚠️ Supabase 설정이 필요합니다</h2>
+        <p>이 파일을 사용하려면 먼저 Supabase 프로젝트 정보를 입력해주세요.</p>
+        <ol style="line-height:1.8;">
+          <li>HTML 파일을 메모장으로 엽니다</li>
+          <li><code style="background:#FFF;padding:2px 6px;">https://hezyqetaiqvarcmvxzat.supabase.co/rest/v1/</code> 검색 (Ctrl+F)</li>
+          <li>다음 두 줄을 본인 값으로 교체:</li>
+        </ol>
+        <pre style="background:#1F2937;color:#10B981;padding:14px;border-radius:8px;font-size:12px;overflow-x:auto;">const https://hezyqetaiqvarcmvxzat.supabase.co/rest/v1/ = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_pkq7GfkAAAT9oavm-Gk86g_KZXOnHuL';</pre>
+        <p style="margin-top:16px;font-size:13px;color:#78350F;">📖 자세한 설정 방법은 "가입/배포 가이드" PDF를 참고하세요.</p>
+      </div>`;
+      return;
+    }
+
+    console.log('[Init] Supabase configured');
+    await loadSettings();
+    console.log('[Init] settings loaded');
+    applySettings();
+    console.log('[Init] settings applied');
+
+    showPage(urlParams.get('admin') === '1' ? 'admin' : 'customer');
+    console.log('[Init] complete');
+  } catch(err) {
+    console.error('[Init] FAILED', err);
+    document.body.innerHTML = `<div style="max-width:600px;margin:60px auto;padding:32px;font-family:'Noto Sans KR',sans-serif;background:#FEE2E2;border-left:6px solid #DC2626;border-radius:12px;">
+      <h2 style="color:#991B1B;margin-top:0;">❌ Supabase 연결 실패</h2>
+      <p><strong>오류:</strong> ${err.message}</p>
+      <h3 style="color:#991B1B;margin-top:24px;">확인해주세요:</h3>
+      <ul style="line-height:1.8;">
+        <li>SUPABASE_URL과 SUPABASE_ANON_KEY가 올바른지</li>
+        <li>Supabase에서 <code>as_receipts</code>, <code>app_settings</code> 테이블을 만들었는지</li>
+        <li>RLS 정책을 설정했는지 (anon insert/select 허용)</li>
+        <li>Storage 버킷 <code>as-images</code>, <code>branding</code>이 public으로 설정되었는지</li>
+      </ul>
+      <button onclick="location.reload()" style="padding:12px 24px;background:#1B4332;color:white;border:none;border-radius:8px;cursor:pointer;margin-top:16px;">다시 시도</button>
+    </div>`;
+  }
+})();
+</script>
+</body>
+</html>
