@@ -697,14 +697,19 @@ async function dbDelete(id) {
 }
 
 /* 메타(설정/카운터/비밀번호) */
-async function metaGet(key) {
+async function metaGetRow(key) {
   try {
-    const arr = await sbRequest(`/app_settings?key=eq.${encodeURIComponent(key)}&select=value`);
-    return arr[0]?.value ?? null;
+    const arr = await sbRequest(`/app_settings?key=eq.${encodeURIComponent(key)}&select=value,updated_at`);
+    return arr[0] ?? null;
   } catch (e) {
-    console.warn('metaGet fail', key, e.message);
+    console.warn('metaGetRow fail', key, e.message);
     return null;
   }
+}
+
+async function metaGet(key) {
+  const row = await metaGetRow(key);
+  return row?.value ?? null;
 }
 
 async function metaSet(key, value) {
@@ -807,22 +812,52 @@ const PRESETS = {
 };
 
 let settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+let settingsUpdatedAt = null;
+
+function hydrateSettings(saved) {
+  settings = {
+    content: { ...DEFAULT_SETTINGS.content, ...saved.content, channels: saved.content?.channels || DEFAULT_SETTINGS.content.channels },
+    branding: { ...DEFAULT_SETTINGS.branding, ...saved.branding },
+    theme: { ...DEFAULT_SETTINGS.theme, ...saved.theme },
+    policy: { ...DEFAULT_SETTINGS.policy, ...saved.policy }
+  };
+}
 
 async function loadSettings() {
-  const saved = await metaGet('app_settings');
+  const row = await metaGetRow('app_settings');
+  const saved = row?.value;
   if (saved) {
-    // 기본값 + 저장값 머지 (새 필드 추가 호환)
-    settings = {
-      content: { ...DEFAULT_SETTINGS.content, ...saved.content, channels: saved.content?.channels || DEFAULT_SETTINGS.content.channels },
-      branding: { ...DEFAULT_SETTINGS.branding, ...saved.branding },
-      theme: { ...DEFAULT_SETTINGS.theme, ...saved.theme },
-      policy: { ...DEFAULT_SETTINGS.policy, ...saved.policy }
-    };
+    hydrateSettings(saved);
+    settingsUpdatedAt = row?.updated_at || settingsUpdatedAt;
   }
 }
 
 async function saveSettings() {
   await metaSet('app_settings', settings);
+  const row = await metaGetRow('app_settings');
+  settingsUpdatedAt = row?.updated_at || new Date().toISOString();
+}
+
+async function syncSettingsFromServer({ silent = true } = {}) {
+  const row = await metaGetRow('app_settings');
+  if (!row?.value) return false;
+  if (settingsUpdatedAt && row.updated_at === settingsUpdatedAt) return false;
+  hydrateSettings(row.value);
+  settingsUpdatedAt = row.updated_at || settingsUpdatedAt;
+  applySettings();
+  if (typeof loadSettingsToEditors === 'function') loadSettingsToEditors();
+  if (!silent) showToast('다른 기기에서 변경된 설정을 불러왔습니다','info');
+  return true;
+}
+
+function startSettingsPolling() {
+  setInterval(async () => {
+    if (document.hidden) return;
+    try { await syncSettingsFromServer({ silent: true }); } catch (e) {}
+  }, 3000);
+  window.addEventListener('focus', () => {
+    syncSettingsFromServer({ silent: true }).catch(() => {});
+  });
 }
 
 /* ============== 설정 적용 함수 ============== */
@@ -1578,9 +1613,21 @@ document.querySelectorAll('[data-preset]').forEach(btn => {
 // 저장 버튼
 document.querySelectorAll('[data-save]').forEach(btn => {
   btn.addEventListener('click', async () => {
-    await saveSettings();
-    applySettings();
-    showToast('✅ 저장 및 반영 완료','success');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '저장 중...';
+    try {
+      await saveSettings();
+      applySettings();
+      loadSettingsToEditors();
+      showToast('✅ 저장 및 반영 완료','success');
+    } catch (err) {
+      console.error(err);
+      showToast('저장 실패: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   });
 });
 
@@ -1654,5 +1701,6 @@ const SUPABASE_ANON_KEY = 'sb_publishable_pkq7GfkAAAT9oavm-Gk86g_KZXOnHuL';</pre
   }
 })();
 </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
